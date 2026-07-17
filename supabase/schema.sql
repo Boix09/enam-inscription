@@ -1,8 +1,3 @@
--- ============================================================
--- Schéma ENAM - Collecte d'informations élèves
--- ============================================================
-
--- 1. Créer la table students
 CREATE TABLE IF NOT EXISTS students (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   no SERIAL NOT NULL,
@@ -17,23 +12,12 @@ CREATE TABLE IF NOT EXISTS students (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 2. Activer Row Level Security
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 
--- 3. Politique INSERT : autorisée pour le rôle anon (élèves sans compte)
-CREATE POLICY "Les élèves peuvent insérer leur fiche"
-  ON students
-  FOR INSERT
-  TO anon
-  WITH CHECK (true);
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT INSERT, SELECT ON TABLE students TO anon;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon;
 
--- 4. Politique SELECT : interdite pour anon
---    Seule la clé service_role (côté serveur) peut lire
-CREATE POLICY "Lecture interdite pour anon"
-  ON students
-  FOR SELECT
-  TO anon
-  USING (false);
+CREATE POLICY insert_policy ON students FOR INSERT WITH CHECK (true);
 
--- 5. Index utile pour le tri par numéro
 CREATE INDEX IF NOT EXISTS idx_students_no ON students (no);
