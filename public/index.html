@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENAM - Fiche de renseignements</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>ECOLE NATIONALE DES ARTS ET METIERS</h1>
+    <h2>ENAM</h2>
+    <p>APPROCHE PAR COMPETENCE (APC) DIPLOME TECHNIQUE</p>
+    <h3>TECHNIQUES RESEAUX INFORMATIQUE PROMOTION 2024-2027</h3>
+  </div>
+
+  <form id="studentForm">
+    <div class="form-section">
+      <h4>Informations personnelles</h4>
+      <label>Nom <span class="required">*</span></label>
+      <input type="text" id="nom" required>
+
+      <label>Prénom <span class="required">*</span></label>
+      <input type="text" id="prenom" required>
+
+      <label>Téléphone WhatsApp</label>
+      <input type="tel" id="telephone_whatsapp" placeholder="+509 XX XX XXXX">
+
+      <label>Téléphone Appel</label>
+      <input type="tel" id="telephone_appel" placeholder="+509 XX XX XXXX">
+
+      <label>Adresse</label>
+      <textarea id="adresse" rows="2"></textarea>
+    </div>
+
+    <div class="form-section">
+      <h4>Personne à contacter</h4>
+      <label>Nom</label>
+      <input type="text" id="contact_nom">
+
+      <label>Lien de parenté</label>
+      <input type="text" id="contact_lien" placeholder="Mère, Père, Tuteur...">
+
+      <label>Téléphone</label>
+      <input type="tel" id="contact_telephone" placeholder="+509 XX XX XXXX">
+    </div>
+
+    <button type="submit" id="submitBtn">Envoyer</button>
+    <p id="message" class="message"></p>
+  </form>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENAM - Administration</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h2>Administration - Fiche de renseignements</h2>
+  </div>
+
+  <div id="loginSection">
+    <form id="loginForm">
+      <label>Mot de passe</label>
+      <input type="password" id="passwordInput" required>
+      <button type="submit">Accéder</button>
+      <p id="loginError" class="message error" style="display:none"></p>
+    </form>
+  </div>
+
+  <div id="adminSection" style="display:none">
+    <div class="admin-actions">
+      <button onclick="exportWord()">Exporter en Word</button>
+      <button onclick="exportExcel()">Exporter en Excel</button>
+      <span id="loadingIndicator" style="display:none">Chargement...</span>
+    </div>
+    <div class="table-wrapper">
+      <table id="studentsTable">
+        <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+const ExcelJS = require("exceljs");
+
+async function generateExcel(students) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Fiche ENAM", {
+    pageSetup: { orientation: "landscape", fitToPage: true, margins: {
+      left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, header: 0, footer: 0
+    }}
+  });
+
+  const border = {
+    top: { style: "thin", color: { argb: "FF000000" } },
+    bottom: { style: "thin", color: { argb: "FF000000" } },
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
+
+  const cols = [
+    { key: "no", w: 6 },
+    { key: "nom", w: 18 },
+    { key: "prenom", w: 20 },
+    { key: "telephone_whatsapp", w: 22 },
+    { key: "telephone_appel", w: 22 },
+    { key: "adresse", w: 30 },
+    { key: "contact_nom", w: 20 },
+    { key: "contact_lien", w: 18 },
+    { key: "contact_telephone", w: 20 },
+  ];
+
+  cols.forEach((c, i) => { ws.getColumn(i + 1).width = c.w; });
+
+  const headerStyle = {
+    font: { bold: true, size: 10 },
+    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } },
+    alignment: { horizontal: "center", vertical: "middle", wrapText: true },
+    border,
+  };
+
+  const dataStyle = {
+    font: { size: 10 },
+    alignment: { vertical: "middle", wrapText: true },
+    border,
+  };
+
+  let row = 1;
+
+  ws.mergeCells(row, 1, row, 9);
+  const titleCell = ws.getCell(row, 1);
+  titleCell.value = "ECOLE NATIONALE DES ARTS ET METIERS\nENAM\nAPPROCHE PAR COMPETENCE (APC) DIPLOME TECHNIQUE";
+  titleCell.font = { bold: true, size: 14 };
+  titleCell.alignment = { horizontal: "center", vertical: "center", wrapText: true };
+  ws.getRow(row).height = 50;
+  row++;
+
+  ws.mergeCells(row, 1, row, 9);
+  const promoCell = ws.getCell(row, 1);
+  promoCell.value = "TECHNIQUES RESEAUX INFORMATIQUE PROMOTION 2024-2027";
+  promoCell.font = { bold: true, size: 12 };
+  promoCell.alignment = { horizontal: "center", vertical: "center" };
+  ws.getRow(row).height = 25;
+  row++;
+
+  row++;
+
+  const headerRow1 = ws.getRow(row);
+  ws.mergeCells(row, 1, row + 1, 1);
+  ws.mergeCells(row, 2, row + 1, 2);
+  ws.mergeCells(row, 3, row + 1, 3);
+  ws.mergeCells(row, 4, row + 1, 4);
+  ws.mergeCells(row, 5, row + 1, 5);
+  ws.mergeCells(row, 6, row + 1, 6);
+  ws.mergeCells(row, 7, row, 9);
+
+  const h1Labels = ["NO", "NOM", "PRENOM", "TELEPHONE WHATSAP", "TELEPHONE APPEL", "ADRESSE", "PERSONNE A CONTACTER"];
+  for (let i = 0; i < 7; i++) {
+    const cell = ws.getCell(row, i + 1);
+    cell.value = h1Labels[i];
+    Object.assign(cell, headerStyle);
+  }
+  headerRow1.height = 25;
+
+  row++;
+  const headerRow2 = ws.getRow(row);
+  const h2Labels = ["", "", "", "", "", "", "NOM", "LIEN DE PARENTE", "TELEPONNE"];
+  for (let i = 0; i < 9; i++) {
+    const cell = ws.getCell(row, i + 1);
+    cell.value = h2Labels[i];
+    Object.assign(cell, headerStyle);
+  }
+  headerRow2.height = 25;
+
+  students.forEach(s => {
+    row++;
+    const vals = [
+      s.no, s.nom, s.prenom, s.telephone_whatsapp || "", s.telephone_appel || "",
+      s.adresse || "", s.contact_nom || "", s.contact_lien || "", s.contact_telephone || ""
+    ];
+    vals.forEach((v, i) => {
+      const cell = ws.getCell(row, i + 1);
+      cell.value = String(v);
+      Object.assign(cell, dataStyle);
+      cell.alignment = { horizontal: i === 0 ? "center" : "left", vertical: "middle", wrapText: true };
+    });
+    ws.getRow(row).height = 20;
+  });
+
+  return await wb.xlsx.writeBuffer();
+}
+
+module.exports = { generateExcel };
