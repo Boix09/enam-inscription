@@ -4,14 +4,25 @@ const {
   ShadingType, PageOrientation
 } = require("docx");
 
-const BORDER = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
-const CELL_BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
+const PAGE_LANDSCAPE_WIDTH = 15840;
+const MARGIN = 720;
+const AVAILABLE_WIDTH = PAGE_LANDSCAPE_WIDTH - MARGIN * 2;
 
-const COL = {
+const COL_RATIOS = {
   no: 500, nom: 1500, prenom: 1700, whatsapp: 2000, appel: 2000,
   adresse: 2600, contactNom: 1700, lien: 1600, tel: 1700,
 };
-const TABLE_WIDTH = Object.values(COL).reduce((a, b) => a + b, 0);
+const RATIO_TOTAL = Object.values(COL_RATIOS).reduce((a, b) => a + b, 0);
+
+function colWidths() {
+  const w = {};
+  for (const [k, v] of Object.entries(COL_RATIOS))
+    w[k] = Math.round(AVAILABLE_WIDTH * v / RATIO_TOTAL);
+  return w;
+}
+
+const BORDER = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
+const CELL_BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 
 function headerCell(text, opts = {}) {
   return new TableCell({
@@ -42,6 +53,9 @@ function dataCell(text, width) {
 }
 
 async function generateDocx(students) {
+  const COL = colWidths();
+  const totalWidth = Object.values(COL).reduce((a, b) => a + b, 0);
+
   const headerRow1 = new TableRow({
     tableHeader: true,
     children: [
@@ -114,7 +128,7 @@ async function generateDocx(students) {
           children: [new TextRun({ text: "TECHNIQUES RESEAUX INFORMATIQUE PROMOTION 2024-2027", bold: true, size: 24 })],
         }),
         new Table({
-          width: { size: TABLE_WIDTH, type: WidthType.DXA },
+          width: { size: totalWidth, type: WidthType.DXA },
           columnWidths: Object.values(COL),
           rows: [headerRow1, headerRow2, ...dataRows],
         }),
