@@ -29,18 +29,18 @@ async function generateExcel(students) {
 
   cols.forEach((c, i) => { ws.getColumn(i + 1).width = c.w; });
 
-  const headerStyle = {
-    font: { bold: true, size: 10 },
-    fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } },
-    alignment: { horizontal: "center", vertical: "middle", wrapText: true },
-    border,
-  };
+  function applyHeaderStyle(cell) {
+    cell.font = { bold: true, size: 10 };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } };
+    cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    cell.border = border;
+  }
 
-  const dataStyle = {
-    font: { size: 10 },
-    alignment: { vertical: "middle", wrapText: true },
-    border,
-  };
+  function applyDataStyle(cell) {
+    cell.font = { size: 10 };
+    cell.alignment = { vertical: "middle", wrapText: true };
+    cell.border = border;
+  }
 
   let row = 1;
 
@@ -75,7 +75,7 @@ async function generateExcel(students) {
   for (let i = 0; i < 7; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h1Labels[i];
-    Object.assign(cell, headerStyle);
+    applyHeaderStyle(cell);
   }
   headerRow1.height = 25;
 
@@ -85,7 +85,7 @@ async function generateExcel(students) {
   for (let i = 0; i < 9; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h2Labels[i];
-    Object.assign(cell, headerStyle);
+    applyHeaderStyle(cell);
   }
   headerRow2.height = 25;
 
@@ -98,7 +98,7 @@ async function generateExcel(students) {
     vals.forEach((v, i) => {
       const cell = ws.getCell(row, i + 1);
       cell.value = String(v);
-      Object.assign(cell, dataStyle);
+      applyDataStyle(cell);
       cell.alignment = { horizontal: i === 0 ? "center" : "left", vertical: "middle", wrapText: true };
     });
     ws.getRow(row).height = 20;
