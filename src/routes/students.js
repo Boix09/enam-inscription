@@ -86,6 +86,24 @@ router.delete("/class/:classeId", async (req, res) => {
   res.json({ success: true });
 });
 
+// PUT /api/students/:id — modifier un élève (admin)
+router.put("/:id", async (req, res) => {
+  const password = req.headers.authorization;
+  if (password !== process.env.ADMIN_PASSWORD)
+    return res.status(401).json({ error: "Non autorisé" });
+
+  const { nom, prenom, telephone_whatsapp, telephone_appel, adresse, contact_nom, contact_lien, contact_telephone } = req.body;
+
+  const { error } = await supabaseAdmin
+    .from("students").update({
+      nom, prenom, telephone_whatsapp, telephone_appel,
+      adresse, contact_nom, contact_lien, contact_telephone
+    }).eq("id", req.params.id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // DELETE /api/students/:id — supprimer un élève (admin)
 router.delete("/:id", async (req, res) => {
   const password = req.headers.authorization;

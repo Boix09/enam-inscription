@@ -97,6 +97,34 @@
   </div>
 </div>
 
+<!-- Modal Edit Student -->
+<div id="editModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeEditModal()">&times;</span>
+    <h3>Modifier l'élève</h3>
+    <form id="editForm">
+      <label>Nom</label>
+      <input type="text" id="editNom" required>
+      <label>Prénom</label>
+      <input type="text" id="editPrenom" required>
+      <label>Téléphone WhatsApp</label>
+      <input type="tel" id="editWhatsapp" placeholder="+509 XX XX XXXX">
+      <label>Téléphone Appel</label>
+      <input type="tel" id="editAppel" placeholder="+509 XX XX XXXX">
+      <label>Adresse</label>
+      <textarea id="editAdresse" rows="2"></textarea>
+      <label>Contact Nom</label>
+      <input type="text" id="editContactNom">
+      <label>Lien de parenté</label>
+      <input type="text" id="editContactLien">
+      <label>Contact Téléphone</label>
+      <input type="tel" id="editContactTel">
+      <button type="submit">Enregistrer</button>
+      <p id="editMsg" class="message" style="display:none"></p>
+    </form>
+  </div>
+</div>
+
 <script src="/admin.js"></script>
 </body>
 </html>

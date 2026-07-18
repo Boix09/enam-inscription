@@ -8,6 +8,23 @@ const list = document.getElementById("autocomplete-list");
 let selectedPreEnrolled = null;
 let contexte = null; // { promotion: {nom,...}, classe: {id, nom} }
 
+// Auto-format téléphone +509
+function formatTel(el) {
+  el.addEventListener("input", () => {
+    let v = el.value.replace(/[^\d+]/g, "");
+    if (v.startsWith("509")) v = "+" + v;
+    if (!v.startsWith("+509") && v.length > 0) v = "+509 " + v.replace(/^\+509\s*/, "");
+    const d = v.replace(/^\+509\s*/, "").replace(/\D/g, "").slice(0, 8);
+    let f = "+509";
+    if (d.length > 0) f += " " + d.slice(0, 2);
+    if (d.length > 2) f += " " + d.slice(2, 4);
+    if (d.length > 4) f += " " + d.slice(4, 8);
+    el.value = f;
+  });
+}
+formatTel(document.getElementById("telephone_whatsapp"));
+formatTel(document.getElementById("telephone_appel"));
+
 // Détecter si on est sur une URL slug
 async function detecterContexte() {
   const path = window.location.pathname;

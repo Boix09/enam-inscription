@@ -1,12 +1,15 @@
 const ExcelJS = require("exceljs");
 
-async function generateExcel(students) {
+async function generateExcel(students, info, logoBuf) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Fiche ENAM", {
     pageSetup: { orientation: "landscape", fitToPage: true, margins: {
       left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, header: 0, footer: 0
     }}
   });
+
+  const nomPromo = info ? info.promo : "Réseaux Informatique 2024-2027";
+  const nomClasse = info ? info.classe : "";
 
   const border = {
     top: { style: "thin", color: { argb: "FF000000" } },
@@ -16,15 +19,10 @@ async function generateExcel(students) {
   };
 
   const cols = [
-    { key: "no", w: 6 },
-    { key: "nom", w: 18 },
-    { key: "prenom", w: 20 },
-    { key: "telephone_whatsapp", w: 22 },
-    { key: "telephone_appel", w: 22 },
-    { key: "adresse", w: 30 },
-    { key: "contact_nom", w: 20 },
-    { key: "contact_lien", w: 18 },
-    { key: "contact_telephone", w: 20 },
+    { key: "no", w: 6 }, { key: "nom", w: 18 }, { key: "prenom", w: 20 },
+    { key: "telephone_whatsapp", w: 22 }, { key: "telephone_appel", w: 22 },
+    { key: "adresse", w: 30 }, { key: "contact_nom", w: 20 },
+    { key: "contact_lien", w: 18 }, { key: "contact_telephone", w: 20 },
   ];
 
   cols.forEach((c, i) => { ws.getColumn(i + 1).width = c.w; });
@@ -44,17 +42,48 @@ async function generateExcel(students) {
 
   let row = 1;
 
+  // Logo
+  if (logoBuf) {
+    const imgId = wb.addImage({ buffer: logoBuf, extension: "jpeg" });
+    ws.addImage(imgId, { tl: { col: 0, row: 0 }, ext: { width: 60, height: 60 } });
+    row = 2;
+  }
+
+  const startRow = row;
   ws.mergeCells(row, 1, row, 9);
   const titleCell = ws.getCell(row, 1);
-  titleCell.value = "ECOLE NATIONALE DES ARTS ET METIERS\nENAM\nAPPROCHE PAR COMPETENCE (APC) DIPLOME TECHNIQUE";
+  titleCell.value = "ECOLE NATIONALE DES ARTS ET METIERS";
   titleCell.font = { bold: true, size: 14 };
   titleCell.alignment = { horizontal: "center", vertical: "center", wrapText: true };
-  ws.getRow(row).height = 50;
+  ws.getRow(row).height = 25;
   row++;
 
   ws.mergeCells(row, 1, row, 9);
+  const enamCell = ws.getCell(row, 1);
+  enamCell.value = "ENAM";
+  enamCell.font = { bold: true, size: 13 };
+  enamCell.alignment = { horizontal: "center", vertical: "center" };
+  row++;
+
+  ws.mergeCells(row, 1, row, 9);
+  const ficheCell = ws.getCell(row, 1);
+  ficheCell.value = "FICHE DE RENSEIGNEMENTS";
+  ficheCell.font = { bold: true, size: 12 };
+  ficheCell.alignment = { horizontal: "center", vertical: "center" };
+  row++;
+
+  if (nomClasse) {
+    ws.mergeCells(row, 1, row, 9);
+    const classeCell = ws.getCell(row, 1);
+    classeCell.value = nomClasse;
+    classeCell.font = { bold: true, size: 11 };
+    classeCell.alignment = { horizontal: "center", vertical: "center" };
+    row++;
+  }
+
+  ws.mergeCells(row, 1, row, 9);
   const promoCell = ws.getCell(row, 1);
-  promoCell.value = "TECHNIQUES RESEAUX INFORMATIQUE PROMOTION 2024-2027";
+  promoCell.value = nomPromo;
   promoCell.font = { bold: true, size: 12 };
   promoCell.alignment = { horizontal: "center", vertical: "center" };
   ws.getRow(row).height = 25;

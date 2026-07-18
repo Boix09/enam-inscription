@@ -155,7 +155,10 @@ function renderTable() {
       <td>${escHtml(s.contact_nom || "")}</td>
       <td>${escHtml(s.contact_lien || "")}</td>
       <td>${escHtml(s.contact_telephone || "")}</td>
-      <td><button class="btn-tiny danger" onclick="retirer('${s.id}')">✕</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn-tiny" onclick="editStudent('${s.id}')">✎</button>
+        <button class="btn-tiny danger" onclick="retirer('${s.id}')">✕</button>
+      </td>
     </tr>
   `).join("");
 
@@ -191,6 +194,72 @@ function restaurer(id) {
   currentStudents.splice(idx, 0, deletedStudents.splice(idx, 1)[0]);
   renderTable();
 }
+
+let editingId = null;
+
+function editStudent(id) {
+  const s = currentStudents.find(x => x.id === id) || deletedStudents.find(x => x.id === id);
+  if (!s) return;
+  editingId = id;
+  document.getElementById("editNom").value = s.nom || "";
+  document.getElementById("editPrenom").value = s.prenom || "";
+  document.getElementById("editWhatsapp").value = s.telephone_whatsapp || "";
+  document.getElementById("editAppel").value = s.telephone_appel || "";
+  document.getElementById("editAdresse").value = s.adresse || "";
+  document.getElementById("editContactNom").value = s.contact_nom || "";
+  document.getElementById("editContactLien").value = s.contact_lien || "";
+  document.getElementById("editContactTel").value = s.contact_telephone || "";
+  document.getElementById("editMsg").style.display = "none";
+  document.getElementById("editModal").style.display = "block";
+}
+
+function formatTel(el) {
+  el.addEventListener("input", () => {
+    let v = el.value.replace(/[^\d+]/g, "");
+    if (v.startsWith("509")) v = "+" + v;
+    if (!v.startsWith("+509") && v.length > 0) v = "+509 " + v.replace(/^\+509\s*/, "");
+    const d = v.replace(/^\+509\s*/, "").replace(/\D/g, "").slice(0, 8);
+    let f = "+509";
+    if (d.length > 0) f += " " + d.slice(0, 2);
+    if (d.length > 2) f += " " + d.slice(2, 4);
+    if (d.length > 4) f += " " + d.slice(4, 8);
+    el.value = f;
+  });
+}
+formatTel(document.getElementById("editWhatsapp"));
+formatTel(document.getElementById("editAppel"));
+formatTel(document.getElementById("editContactTel"));
+
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+  editingId = null;
+}
+
+document.getElementById("editForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("editMsg");
+  msg.style.display = "none";
+  const body = {
+    nom: document.getElementById("editNom").value.trim(),
+    prenom: document.getElementById("editPrenom").value.trim(),
+    telephone_whatsapp: document.getElementById("editWhatsapp").value.trim(),
+    telephone_appel: document.getElementById("editAppel").value.trim(),
+    adresse: document.getElementById("editAdresse").value.trim(),
+    contact_nom: document.getElementById("editContactNom").value.trim(),
+    contact_lien: document.getElementById("editContactLien").value.trim(),
+    contact_telephone: document.getElementById("editContactTel").value.trim(),
+  };
+  try {
+    const res = await fetch("/api/students/" + editingId, {
+      method: "PUT",
+      headers: { "Authorization": token, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const d = await res.json(); msg.textContent = d.error; msg.className = "message error"; msg.style.display = "block"; return; }
+    closeEditModal();
+    await loadStudents();
+  } catch(e) { msg.textContent = "Erreur réseau"; msg.className = "message error"; msg.style.display = "block"; }
+});
 
 async function supprimerPermanent(id) {
   await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });

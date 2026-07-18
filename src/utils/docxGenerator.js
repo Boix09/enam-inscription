@@ -1,22 +1,12 @@
 const {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   WidthType, PageOrientation, TextRun, AlignmentType, BorderStyle,
-  ShadingType, VerticalMergeType
+  ShadingType, VerticalMergeType, ImageRun
 } = require("docx");
 
 const MARGIN = 720;
-const PAGE_WIDTH_LANDSCAPE = 15840 - MARGIN * 2;
-
 const COL_WIDTHS = [
-  600,  // NO
-  1600, // NOM
-  1600, // PRENOM
-  2000, // TEL WHATSAPP
-  2000, // TEL APPEL
-  2800, // ADRESSE
-  1400, // NOM (contact)
-  1200, // LIEN DE PARENTE
-  1200, // TELEPONNE
+  600, 1600, 1600, 2000, 2000, 2800, 1400, 1200, 1200,
 ];
 
 const BORDER = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
@@ -38,8 +28,10 @@ function cell(text, opts = {}) {
   });
 }
 
-async function generateDocx(students) {
+async function generateDocx(students, info, logoBuf) {
   const totalWidth = COL_WIDTHS.reduce((a, b) => a + b, 0);
+  const nomPromo = info ? info.promo : "Réseaux Informatique 2024-2027";
+  const nomClasse = info ? info.classe : "";
 
   const headerRow1 = new TableRow({
     tableHeader: true,
@@ -83,6 +75,52 @@ async function generateDocx(students) {
     ],
   }));
 
+  const children = [];
+
+  if (logoBuf) {
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [new ImageRun({ data: logoBuf, transformation: { width: 80, height: 80 } })],
+    }));
+  }
+
+  children.push(new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 0 },
+    children: [new TextRun({ text: "ECOLE NATIONALE DES ARTS ET METIERS", bold: true, size: 28 })],
+  }));
+  children.push(new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 0 },
+    children: [new TextRun({ text: "ENAM", bold: true, size: 26 })],
+  }));
+  children.push(new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 60 },
+    children: [new TextRun({ text: "FICHE DE RENSEIGNEMENTS", bold: true, size: 22 })],
+  }));
+
+  if (nomClasse) {
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [new TextRun({ text: nomClasse, bold: true, size: 20 })],
+    }));
+  }
+
+  children.push(new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+    children: [new TextRun({ text: nomPromo, bold: true, size: 24 })],
+  }));
+
+  children.push(new Table({
+    width: { size: totalWidth, type: WidthType.DXA },
+    columnWidths: COL_WIDTHS,
+    rows: [headerRow1, headerRow2, ...dataRows],
+  }));
+
   const doc = new Document({
     sections: [{
       properties: {
@@ -91,28 +129,7 @@ async function generateDocx(students) {
           margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN },
         },
       },
-      children: [
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 0 },
-          children: [new TextRun({ text: "ECOLE NATIONALE DES ARTS ET METIERS", bold: true, size: 28 })],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 0 },
-          children: [new TextRun({ text: "ENAM", bold: true, size: 26 })],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 },
-          children: [new TextRun({ text: "FICHE DE RENSEIGNEMENTS", bold: true, size: 22 })],
-        }),
-        new Table({
-          width: { size: totalWidth, type: WidthType.DXA },
-          columnWidths: COL_WIDTHS,
-          rows: [headerRow1, headerRow2, ...dataRows],
-        }),
-      ],
+      children,
     }],
   });
 
