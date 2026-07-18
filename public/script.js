@@ -24,6 +24,7 @@ function formatTel(el) {
 }
 formatTel(document.getElementById("telephone_whatsapp"));
 formatTel(document.getElementById("telephone_appel"));
+formatTel(document.getElementById("contact_telephone"));
 
 // Détecter si on est sur une URL slug
 async function detecterContexte() {
