@@ -38,11 +38,11 @@ async function generateDocx(students, info, logoBuf) {
     children: [
       cell("NO", { colIndex: 0, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("NOM", { colIndex: 1, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
-      cell("PRENOM", { colIndex: 2, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
-      cell("TELEPHONE WHATSAPP", { colIndex: 3, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
-      cell("TELEPHONE APPEL", { colIndex: 4, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("PRÉNOM", { colIndex: 2, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("TÉLÉPHONE WHATSAPP", { colIndex: 3, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("TÉLÉPHONE APPEL", { colIndex: 4, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("ADRESSE", { colIndex: 5, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
-      cell("PERSONNE A CONTACTER", { colIndex: 6, colSpan: 3, shaded: true, center: true, bold: true }),
+      cell("PERSONNE À CONTACTER", { colIndex: 6, colSpan: 3, shaded: true, center: true, bold: true }),
     ],
   });
 
@@ -56,8 +56,8 @@ async function generateDocx(students, info, logoBuf) {
       cell("", { colIndex: 4, vMerge: VerticalMergeType.CONTINUE }),
       cell("", { colIndex: 5, vMerge: VerticalMergeType.CONTINUE }),
       cell("NOM", { colIndex: 6, shaded: true, center: true, bold: true }),
-      cell("LIEN DE PARENTE", { colIndex: 7, shaded: true, center: true, bold: true }),
-      cell("TELEPHONE", { colIndex: 8, shaded: true, center: true, bold: true }),
+      cell("LIEN DE PARENTÉ", { colIndex: 7, shaded: true, center: true, bold: true }),
+      cell("TÉLÉPHONE", { colIndex: 8, shaded: true, center: true, bold: true }),
     ],
   });
 
@@ -88,7 +88,7 @@ async function generateDocx(students, info, logoBuf) {
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 0 },
-    children: [new TextRun({ text: "ECOLE NATIONALE DES ARTS ET METIERS", bold: true, size: 28 })],
+    children: [new TextRun({ text: "ÉCOLE NATIONALE DES ARTS ET MÉTIERS", bold: true, size: 28 })],
   }));
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,

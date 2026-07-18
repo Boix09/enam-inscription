@@ -52,7 +52,7 @@ async function generateExcel(students, info, logoBuf) {
   const startRow = row;
   ws.mergeCells(row, 1, row, 9);
   const titleCell = ws.getCell(row, 1);
-  titleCell.value = "ECOLE NATIONALE DES ARTS ET METIERS";
+  titleCell.value = "ÉCOLE NATIONALE DES ARTS ET MÉTIERS";
   titleCell.font = { bold: true, size: 14 };
   titleCell.alignment = { horizontal: "center", vertical: "center", wrapText: true };
   ws.getRow(row).height = 25;
@@ -100,7 +100,7 @@ async function generateExcel(students, info, logoBuf) {
   ws.mergeCells(row, 6, row + 1, 6);
   ws.mergeCells(row, 7, row, 9);
 
-  const h1Labels = ["NO", "NOM", "PRENOM", "TELEPHONE WHATSAPP", "TELEPHONE APPEL", "ADRESSE", "PERSONNE A CONTACTER"];
+  const h1Labels = ["NO", "NOM", "PRÉNOM", "TÉLÉPHONE WHATSAPP", "TÉLÉPHONE APPEL", "ADRESSE", "PERSONNE À CONTACTER"];
   for (let i = 0; i < 7; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h1Labels[i];
@@ -110,7 +110,7 @@ async function generateExcel(students, info, logoBuf) {
 
   row++;
   const headerRow2 = ws.getRow(row);
-  const h2Labels = ["", "", "", "", "", "", "NOM", "LIEN DE PARENTE", "TELEPHONE"];
+  const h2Labels = ["", "", "", "", "", "", "NOM", "LIEN DE PARENTÉ", "TÉLÉPHONE"];
   for (let i = 0; i < 9; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h2Labels[i];

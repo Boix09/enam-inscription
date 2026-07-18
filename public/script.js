@@ -65,7 +65,7 @@ nomInput.addEventListener("input", () => {
       list.style.display = "block";
       data.forEach(p => {
         const div = document.createElement("div");
-        div.textContent = p.nom + " " + p.prenom + (p.registered ? " (deja inscrit)" : "");
+        div.textContent = p.nom + " " + p.prenom + (p.registered ? " (déjà inscrit)" : "");
         if (p.registered) div.style.opacity = "0.5";
         div.addEventListener("click", () => {
           nomInput.value = p.nom;
@@ -137,12 +137,12 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    showMessage("Merci, tes informations ont ete enregistrees !", "success");
+    showMessage("Merci, tes informations ont été enregistrées !", "success");
     form.reset();
     submitBtn.textContent = "Envoye ✓";
     selectedPreEnrolled = null;
   } catch (err) {
-    showMessage("Impossible de contacter le serveur. Verifie ta connexion et reessaie.", "error");
+    showMessage("Impossible de contacter le serveur. Vérifie ta connexion et réessaie.", "error");
     submitBtn.disabled = false;
     submitBtn.textContent = "Envoyer";
   }
