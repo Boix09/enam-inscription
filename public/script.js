@@ -107,8 +107,8 @@ form.addEventListener("submit", async (e) => {
 
   if (contexte) payload.classe_id = contexte.classe.id;
 
-  if (!payload.nom || !payload.prenom) {
-    showMessage("Nom et prénom sont obligatoires.", "error");
+  if (!payload.nom || !payload.prenom || !payload.telephone_whatsapp || !payload.telephone_appel || !payload.adresse || !payload.contact_nom || !payload.contact_lien || !payload.contact_telephone) {
+    showMessage("Tous les champs sont obligatoires.", "error");
     submitBtn.disabled = false;
     submitBtn.textContent = "Envoyer";
     return;

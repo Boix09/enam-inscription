@@ -29,26 +29,26 @@
       <label>Prénom <span class="required">*</span></label>
       <input type="text" id="prenom" required>
 
-      <label>Téléphone WhatsApp</label>
-      <input type="tel" id="telephone_whatsapp" placeholder="+509 XX XX XXXX" pattern="\+509 \d{2} \d{2} \d{4}" maxlength="16">
+      <label>Téléphone WhatsApp <span class="required">*</span></label>
+      <input type="tel" id="telephone_whatsapp" required placeholder="+509 XX XX XXXX" pattern="\+509 \d{2} \d{2} \d{4}" maxlength="16">
 
-      <label>Téléphone Appel</label>
-      <input type="tel" id="telephone_appel" placeholder="+509 XX XX XXXX" pattern="\+509 \d{2} \d{2} \d{4}" maxlength="16">
+      <label>Téléphone Appel <span class="required">*</span></label>
+      <input type="tel" id="telephone_appel" required placeholder="+509 XX XX XXXX" pattern="\+509 \d{2} \d{2} \d{4}" maxlength="16">
 
-      <label>Adresse</label>
-      <textarea id="adresse" rows="2"></textarea>
+      <label>Adresse <span class="required">*</span></label>
+      <textarea id="adresse" required rows="2"></textarea>
     </div>
 
     <div class="form-section">
       <h4>Personne à contacter</h4>
-      <label>Nom</label>
-      <input type="text" id="contact_nom">
+      <label>Nom <span class="required">*</span></label>
+      <input type="text" id="contact_nom" required>
 
-      <label>Lien de parenté</label>
-      <input type="text" id="contact_lien" placeholder="Mère, Père, Tuteur...">
+      <label>Lien de parenté <span class="required">*</span></label>
+      <input type="text" id="contact_lien" required placeholder="Mère, Père, Tuteur...">
 
-      <label>Téléphone</label>
-      <input type="tel" id="contact_telephone" placeholder="+509 XX XX XXXX">
+      <label>Téléphone <span class="required">*</span></label>
+      <input type="tel" id="contact_telephone" required placeholder="+509 XX XX XXXX" pattern="\+509 \d{2} \d{2} \d{4}" maxlength="16">
     </div>
 
     <button type="submit" id="submitBtn">Envoyer</button>
