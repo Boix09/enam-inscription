@@ -130,16 +130,31 @@ document.getElementById("promoForm").addEventListener("submit", async (e) => {
 // --- Students / Exports ---
 let currentStudents = [];
 let deletedStudents = [];
+let classeMap = {};
 
 async function loadStudents() {
   const tbody = document.querySelector("#studentsTable tbody");
   try {
+    await buildClasseMap();
     const classeId = document.getElementById("classeFilter")?.value || "";
     const url = "/api/students" + (classeId ? "?classe_id=" + classeId : "");
     const res = await fetch(url, { headers: { "Authorization": token } });
     currentStudents = await res.json();
     renderTable();
-  } catch(e) { tbody.innerHTML = "<tr><td colspan='10'>Erreur chargement</td></tr>"; }
+  } catch(e) { tbody.innerHTML = "<tr><td colspan='11'>Erreur chargement</td></tr>"; }
+}
+
+async function buildClasseMap() {
+  try {
+    const res = await fetch("/api/admin/promotions", { headers: { "Authorization": token } });
+    const promotions = await res.json();
+    classeMap = {};
+    promotions.forEach(p => {
+      p.classes.forEach(c => {
+        classeMap[c.id] = escHtml(p.nom) + " - " + escHtml(c.nom);
+      });
+    });
+  } catch(e) {}
 }
 
 function renderTable() {
@@ -149,6 +164,7 @@ function renderTable() {
       <td>${i + 1}</td>
       <td>${escHtml(s.nom)}</td>
       <td>${escHtml(s.prenom)}</td>
+      <td style="font-size:12px;color:var(--text-secondary)">${classeMap[s.classe_id] || ""}</td>
       <td>${escHtml(s.telephone_whatsapp || "")}</td>
       <td>${escHtml(s.telephone_appel || "")}</td>
       <td>${escHtml(s.adresse || "")}</td>
@@ -269,8 +285,20 @@ async function supprimerPermanent(id) {
 
 function viderClasseDepuisEleves() {
   const sel = document.getElementById("classeFilter");
-  if (!sel || !sel.value) { alert("Sélectionne d'abord une classe dans le filtre"); return; }
-  viderClasse(sel.value);
+  if (sel && sel.value) { viderClasse(sel.value); return; }
+  // Calcule les classes qui ont des élèves
+  const classesAvecEleves = {};
+  for (const s of currentStudents) {
+    if (s.classe_id) classesAvecEleves[s.classe_id] = (classesAvecEleves[s.classe_id] || 0) + 1;
+  }
+  const ids = Object.keys(classesAvecEleves);
+  if (ids.length === 1) { viderClasse(ids[0]); return; }
+  if (ids.length === 0) { alert("Aucun élève à supprimer"); return; }
+  const c = confirm(classeMap[ids[0]] + " (" + classesAvecEleves[ids[0]] + " élèves)\nCliquer OK pour vider cette classe, ANNULER pour vider TOUT");
+  if (c) { viderClasse(ids[0]); return; }
+  if (confirm("Vider TOUTES les classes ?")) {
+    ids.forEach(id => viderClasse(id));
+  }
 }
 
 async function viderClasse(classeId) {
