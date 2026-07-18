@@ -101,6 +101,7 @@ form.addEventListener("submit", async (e) => {
     contact_nom: document.getElementById("contact_nom").value.trim(),
     contact_lien: document.getElementById("contact_lien").value.trim(),
     contact_telephone: document.getElementById("contact_telephone").value.trim(),
+    browser: getBrowserInfo(),
   };
 
   if (contexte) payload.classe_id = contexte.classe.id;
@@ -145,6 +146,22 @@ form.addEventListener("submit", async (e) => {
     submitBtn.textContent = "Envoyer";
   }
 });
+
+function getBrowserInfo() {
+  const d = window.screen;
+  let device = "Desktop";
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) device = "Mobile";
+  else if (/Tablet|iPad/i.test(navigator.userAgent)) device = "Tablet";
+  return {
+    screen: d.width + "x" + d.height,
+    language: navigator.language || "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+    platform: navigator.platform || "",
+    device_type: device,
+    referrer: document.referrer || "",
+    page_url: window.location.href,
+  };
+}
 
 function escHtml(str) {
   const div = document.createElement("div");

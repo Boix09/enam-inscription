@@ -27,6 +27,7 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="promotions">Promotions</button>
       <button class="tab-btn" data-tab="eleves">Élèves</button>
+      <button class="tab-btn" data-tab="journal">Journal</button>
     </div>
 
     <!-- Tab Promotions -->
@@ -41,6 +42,27 @@
         <p id="whatsappMsg" style="font-size:12px;color:var(--text-secondary);margin-top:4px"></p>
       </div>
       <div id="promotionsList" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Tab Journal -->
+    <div id="tab-journal" class="tab-content" style="display:none">
+      <div class="admin-actions">
+        <select id="logClasseFilter" onchange="loadLogs()">
+          <option value="">Toutes les classes</option>
+        </select>
+        <select id="logStatusFilter" onchange="loadLogs()">
+          <option value="">Tous les statuts</option>
+          <option value="success">Réussies</option>
+          <option value="rejected">Refusées</option>
+        </select>
+        <span id="logCount" style="font-size:13px;color:var(--text-secondary)"></span>
+      </div>
+      <div class="table-wrapper">
+        <table id="logsTable">
+          <thead><tr><th>Date</th><th>Nom</th><th>Prénom</th><th>Status</th><th>Raison</th><th>IP</th><th>Navigateur</th><th>Écran</th><th>Langue</th><th>Fuseau</th><th>Plateforme</th><th>Appareil</th><th>Page</th><th>Provenance</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Tab Élèves -->

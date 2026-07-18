@@ -19,6 +19,7 @@ app.use("/api/students", studentsRouter);
 app.use("/api/exports", exportsRouter);
 app.use("/api", require("./routes/preEnrolled"));
 app.use("/api/admin/promotions", require("./routes/admin/promotions"));
+app.use("/api/logs", require("./routes/logs"));
 app.use("/", require("./routes/public"));
 
 app.get("/admin", (req, res) => {

@@ -35,6 +35,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
     if (btn.dataset.tab === "eleves") { loadStudents(); populateClasseFilter(); }
+    if (btn.dataset.tab === "journal") { loadLogs(); populateLogClasseFilter(); }
   });
 });
 
@@ -334,6 +335,54 @@ async function confirmDeleteAll() {
   }
   deletedStudents = [];
   renderTable();
+}
+
+// --- Journal (logs) ---
+async function loadLogs() {
+  const tbody = document.querySelector("#logsTable tbody");
+  try {
+    const classeId = document.getElementById("logClasseFilter")?.value || "";
+    const status = document.getElementById("logStatusFilter")?.value || "";
+    let url = "/api/logs?limit=200";
+    if (classeId) url += "&classe_id=" + classeId;
+    const res = await fetch(url, { headers: { "Authorization": token } });
+    let logs = await res.json();
+    if (status === "success") logs = logs.filter(l => l.success);
+    if (status === "rejected") logs = logs.filter(l => !l.success);
+    document.getElementById("logCount").textContent = logs.length + " entrées";
+    tbody.innerHTML = logs.map(l => `
+      <tr style="${l.success ? "" : "background:rgba(255,0,0,0.05)"}">
+        <td style="white-space:nowrap;font-size:12px">${new Date(l.created_at).toLocaleString("fr-FR")}</td>
+        <td>${escHtml(l.student_nom || "")}</td>
+        <td>${escHtml(l.student_prenom || "")}</td>
+        <td>${l.success ? "✅" : "❌"}</td>
+        <td style="font-size:12px;color:var(--text-secondary)">${escHtml(l.reject_reason || "")}</td>
+        <td style="font-size:12px">${escHtml(l.ip_address || "")}</td>
+        <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(l.user_agent || "")}">${escHtml((l.user_agent || "").slice(0, 40))}</td>
+        <td style="font-size:12px">${escHtml(l.screen_resolution || "")}</td>
+        <td style="font-size:12px">${escHtml(l.language || "")}</td>
+        <td style="font-size:12px">${escHtml(l.timezone || "")}</td>
+        <td style="font-size:12px">${escHtml(l.platform || "")}</td>
+        <td style="font-size:12px">${escHtml(l.device_type || "")}</td>
+        <td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(l.page_url || "")}">${escHtml((l.page_url || "").slice(0, 30))}</td>
+        <td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(l.referrer || "")}">${escHtml((l.referrer || "").slice(0, 30))}</td>
+      </tr>
+    `).join("");
+  } catch(e) { tbody.innerHTML = "<tr><td colspan='14'>Erreur chargement</td></tr>"; }
+}
+
+async function populateLogClasseFilter() {
+  const sel = document.getElementById("logClasseFilter");
+  try {
+    const res = await fetch("/api/admin/promotions", { headers: { "Authorization": token } });
+    const promotions = await res.json();
+    sel.innerHTML = '<option value="">Toutes les classes</option>';
+    promotions.forEach(p => {
+      p.classes.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${escHtml(p.nom)} - ${escHtml(c.nom)}</option>`;
+      });
+    });
+  } catch(e) {}
 }
 
 async function populateClasseFilter() {

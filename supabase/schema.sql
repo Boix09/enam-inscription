@@ -62,3 +62,30 @@ CREATE INDEX IF NOT EXISTS idx_pre_enrolled_nom ON pre_enrolled (nom);
 CREATE INDEX IF NOT EXISTS idx_classes_promotion ON classes (promotion_id);
 CREATE INDEX IF NOT EXISTS idx_students_classe ON students (classe_id);
 CREATE INDEX IF NOT EXISTS idx_pre_enrolled_classe ON pre_enrolled (classe_id);
+
+CREATE TABLE IF NOT EXISTS submission_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_nom TEXT,
+  student_prenom TEXT,
+  classe_id UUID REFERENCES classes(id),
+  ip_address TEXT,
+  user_agent TEXT,
+  screen_resolution TEXT,
+  language TEXT,
+  timezone TEXT,
+  platform TEXT,
+  device_type TEXT,
+  referrer TEXT,
+  page_url TEXT,
+  success BOOLEAN DEFAULT false,
+  reject_reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE submission_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY select_submission_logs ON submission_logs FOR SELECT USING (true);
+CREATE POLICY insert_submission_logs ON submission_logs FOR INSERT WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_submission_logs_classe ON submission_logs (classe_id);
+CREATE INDEX IF NOT EXISTS idx_submission_logs_created ON submission_logs (created_at DESC);
