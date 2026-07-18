@@ -127,15 +127,18 @@ document.getElementById("promoForm").addEventListener("submit", async (e) => {
 });
 
 // --- Students / Exports ---
+let currentStudents = [];
+
 async function loadStudents() {
   const tbody = document.querySelector("#studentsTable tbody");
   try {
     const classeId = document.getElementById("classeFilter")?.value || "";
     const url = "/api/students" + (classeId ? "?classe_id=" + classeId : "");
     const res = await fetch(url, { headers: { "Authorization": token } });
-    const students = await res.json();
-    tbody.innerHTML = students.map(s => `
+    currentStudents = await res.json();
+    tbody.innerHTML = currentStudents.map(s => `
       <tr>
+        <td><input type="checkbox" class="student-check" value="${s.id}"></td>
         <td>${s.no}</td>
         <td>${escHtml(s.nom)}</td>
         <td>${escHtml(s.prenom)}</td>
@@ -145,9 +148,10 @@ async function loadStudents() {
         <td>${escHtml(s.contact_nom || "")}</td>
         <td>${escHtml(s.contact_lien || "")}</td>
         <td>${escHtml(s.contact_telephone || "")}</td>
+        <td><button class="btn-tiny danger" onclick="deleteStudent('${s.id}')">✕</button></td>
       </tr>
     `).join("");
-  } catch(e) { tbody.innerHTML = "<tr><td colspan='9'>Erreur chargement</td></tr>"; }
+  } catch(e) { tbody.innerHTML = "<tr><td colspan='11'>Erreur chargement</td></tr>"; }
 }
 
 async function populateClasseFilter() {
@@ -164,6 +168,28 @@ async function populateClasseFilter() {
   } catch(e) {}
 }
 
+function getSelectedIds() {
+  return Array.from(document.querySelectorAll(".student-check:checked")).map(cb => cb.value);
+}
+
+function toggleAll() {
+  const checked = document.getElementById("selectAll").checked;
+  document.querySelectorAll(".student-check").forEach(cb => cb.checked = checked);
+}
+
+async function deleteSelected() {
+  const ids = getSelectedIds();
+  if (!ids.length) return alert("Sélectionne des élèves d'abord");
+  if (!confirm("Supprimer " + ids.length + " élève(s) ?")) return;
+  for (const id of ids) await deleteStudent(id, true);
+  loadStudents();
+}
+
+async function deleteStudent(id, silent) {
+  const res = await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
+  if (!res.ok && !silent) alert("Erreur lors de la suppression");
+}
+
 function getExportSuffix() {
   const sel = document.getElementById("classeFilter");
   if (!sel || !sel.value) return "";
@@ -171,14 +197,27 @@ function getExportSuffix() {
   return "_" + text.replace(/[^a-zA-Z0-9]/g, "_");
 }
 
+function buildExportUrl(base) {
+  const params = new URLSearchParams();
+  const classeId = document.getElementById("classeFilter")?.value || "";
+  if (classeId) params.set("classe_id", classeId);
+  return base + "?" + params.toString();
+}
+
+function buildExportUrlSelected(base) {
+  const ids = getSelectedIds();
+  if (!ids.length) { alert("Sélectionne des élèves d'abord"); return null; }
+  const params = new URLSearchParams();
+  params.set("ids", ids.join(","));
+  return base + "?" + params.toString();
+}
+
 async function exportWord() {
   if (!token) return;
   const ind = document.getElementById("loadingIndicator");
   ind.style.display = "inline";
   try {
-    const classeId = document.getElementById("classeFilter")?.value || "";
-    const url = "/api/exports/word" + (classeId ? "?classe_id=" + classeId : "");
-    const res = await fetch(url, { headers: { "Authorization": token } });
+    const res = await fetch(buildExportUrl("/api/exports/word"), { headers: { "Authorization": token } });
     if (!res.ok) { alert("Erreur d'export"); return; }
     downloadBlob(await res.blob(), "fiche_renseignements_ENAM" + getExportSuffix() + ".docx");
   } finally { ind.style.display = "none"; }
@@ -189,11 +228,35 @@ async function exportExcel() {
   const ind = document.getElementById("loadingIndicator");
   ind.style.display = "inline";
   try {
-    const classeId = document.getElementById("classeFilter")?.value || "";
-    const url = "/api/exports/excel" + (classeId ? "?classe_id=" + classeId : "");
-    const res = await fetch(url, { headers: { "Authorization": token } });
+    const res = await fetch(buildExportUrl("/api/exports/excel"), { headers: { "Authorization": token } });
     if (!res.ok) { alert("Erreur d'export"); return; }
     downloadBlob(await res.blob(), "fiche_renseignements_ENAM" + getExportSuffix() + ".xlsx");
+  } finally { ind.style.display = "none"; }
+}
+
+async function exportSelectedWord() {
+  if (!token) return;
+  const url = buildExportUrlSelected("/api/exports/word");
+  if (!url) return;
+  const ind = document.getElementById("loadingIndicator");
+  ind.style.display = "inline";
+  try {
+    const res = await fetch(url, { headers: { "Authorization": token } });
+    if (!res.ok) { alert("Erreur d'export"); return; }
+    downloadBlob(await res.blob(), "fiche_renseignements_ENAM_selection.docx");
+  } finally { ind.style.display = "none"; }
+}
+
+async function exportSelectedExcel() {
+  if (!token) return;
+  const url = buildExportUrlSelected("/api/exports/excel");
+  if (!url) return;
+  const ind = document.getElementById("loadingIndicator");
+  ind.style.display = "inline";
+  try {
+    const res = await fetch(url, { headers: { "Authorization": token } });
+    if (!res.ok) { alert("Erreur d'export"); return; }
+    downloadBlob(await res.blob(), "fiche_renseignements_ENAM_selection.xlsx");
   } finally { ind.style.display = "none"; }
 }
 
@@ -213,7 +276,6 @@ function escHtml(str) {
   return div.innerHTML;
 }
 
-// Close modal on outside click
 window.addEventListener("click", e => {
   const modal = document.getElementById("promoModal");
   if (e.target === modal) closeModal();

@@ -69,9 +69,9 @@ async function generateDocx(students) {
     ],
   });
 
-  const dataRows = students.map(s => new TableRow({
+  const dataRows = students.map((s, i) => new TableRow({
     children: [
-      cell(String(s.no), { colIndex: 0, center: true }),
+      cell(String(i + 1), { colIndex: 0, center: true }),
       cell(s.nom, { colIndex: 1 }),
       cell(s.prenom, { colIndex: 2 }),
       cell(s.telephone_whatsapp || "", { colIndex: 3 }),

@@ -174,6 +174,9 @@ th { background: var(--header-bg); font-weight: 600; position: sticky; top: 0; }
 .modal-close { float: right; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
 .modal-close:hover { color: var(--text); }
 
+.danger { background: #e53e3e !important; border-color: #e53e3e !important; color: #fff !important; }
+.danger:hover { background: #c53030 !important; }
+
 select#classeFilter {
   padding: 8px 12px; font-size: 14px; border: 1px solid var(--border);
   border-radius: 8px; background: var(--input-bg); color: var(--text);

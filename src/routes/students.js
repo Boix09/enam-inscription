@@ -70,4 +70,24 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// DELETE /api/students/:id — supprimer un élève (admin)
+router.delete("/:id", async (req, res) => {
+  const password = req.headers.authorization;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+
+  const { error } = await supabaseAdmin
+    .from("students")
+    .delete()
+    .eq("id", req.params.id);
+
+  if (error) {
+    console.error("Erreur suppression:", error);
+    return res.status(500).json({ error: "Erreur lors de la suppression" });
+  }
+
+  res.json({ success: true });
+});
+
 module.exports = router;

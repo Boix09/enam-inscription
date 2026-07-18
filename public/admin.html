@@ -41,13 +41,16 @@
         <select id="classeFilter" onchange="loadStudents()">
           <option value="">Toutes les classes</option>
         </select>
-        <button onclick="exportWord()">Word</button>
-        <button onclick="exportExcel()">Excel</button>
+        <button onclick="exportWord()" class="btn-secondary">Word</button>
+        <button onclick="exportExcel()" class="btn-secondary">Excel</button>
+        <button onclick="exportSelectedWord()" class="btn-secondary">Word (sélection)</button>
+        <button onclick="exportSelectedExcel()" class="btn-secondary">Excel (sélection)</button>
+        <button onclick="deleteSelected()" class="btn-secondary danger">Supprimer</button>
         <span id="loadingIndicator" style="display:none">Chargement...</span>
       </div>
       <div class="table-wrapper">
         <table id="studentsTable">
-          <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th></tr></thead>
+          <thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleAll()"></th><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th><th>Action</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>

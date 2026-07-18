@@ -89,10 +89,10 @@ async function generateExcel(students) {
   }
   headerRow2.height = 25;
 
-  students.forEach(s => {
+  students.forEach((s, idx) => {
     row++;
     const vals = [
-      s.no, s.nom, s.prenom, s.telephone_whatsapp || "", s.telephone_appel || "",
+      idx + 1, s.nom, s.prenom, s.telephone_whatsapp || "", s.telephone_appel || "",
       s.adresse || "", s.contact_nom || "", s.contact_lien || "", s.contact_telephone || ""
     ];
     vals.forEach((v, i) => {
