@@ -39,7 +39,7 @@ async function generateDocx(students, info, logoBuf) {
       cell("NO", { colIndex: 0, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("NOM", { colIndex: 1, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("PRENOM", { colIndex: 2, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
-      cell("TELEPHONE WHATSAP", { colIndex: 3, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("TELEPHONE WHATSAPP", { colIndex: 3, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("TELEPHONE APPEL", { colIndex: 4, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("ADRESSE", { colIndex: 5, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
       cell("PERSONNE A CONTACTER", { colIndex: 6, colSpan: 3, shaded: true, center: true, bold: true }),
@@ -57,7 +57,7 @@ async function generateDocx(students, info, logoBuf) {
       cell("", { colIndex: 5, vMerge: VerticalMergeType.CONTINUE }),
       cell("NOM", { colIndex: 6, shaded: true, center: true, bold: true }),
       cell("LIEN DE PARENTE", { colIndex: 7, shaded: true, center: true, bold: true }),
-      cell("TELEPONNE", { colIndex: 8, shaded: true, center: true, bold: true }),
+      cell("TELEPHONE", { colIndex: 8, shaded: true, center: true, bold: true }),
     ],
   });
 

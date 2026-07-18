@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
   const { nom, prenom, telephone_whatsapp, telephone_appel, adresse, contact_nom, contact_lien, contact_telephone, classe_id } = req.body;
 
   if (!nom || !prenom) {
-    logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Champs obligatoires manquants" });
+    await logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Champs obligatoires manquants" });
     return res.status(400).json({ error: "Nom et prénom sont obligatoires" });
   }
 
@@ -40,7 +40,7 @@ router.post("/", async (req, res) => {
 
   const { data: existing } = await query.maybeSingle();
   if (existing) {
-    logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Doublon nom+prénom dans la classe" });
+    await logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Doublon nom+prénom dans la classe" });
     return res.status(409).json({ error: "Cet élève est déjà inscrit dans cette classe." });
   }
 
@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
       .eq("classe_id", classe_id)
       .maybeSingle();
     if (telExists) {
-      logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Téléphone WhatsApp déjà utilisé dans la classe" });
+      await logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Téléphone WhatsApp déjà utilisé dans la classe" });
       return res.status(409).json({ error: "Ce numéro WhatsApp est déjà utilisé dans cette classe." });
     }
   }
@@ -68,7 +68,7 @@ router.post("/", async (req, res) => {
 
   if (error) {
     console.error("Erreur insertion:", error);
-    logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Erreur serveur: " + error.message });
+    await logSubmission(req, { nom, prenom, classe_id, success: false, reject_reason: "Erreur serveur: " + error.message });
     return res.status(500).json({ error: "Erreur lors de l'enregistrement. Vérifie ta connexion et réessaie." });
   }
 
@@ -76,7 +76,7 @@ router.post("/", async (req, res) => {
   if (classe_id) preQuery.eq("classe_id", classe_id);
   await preQuery;
 
-  logSubmission(req, { nom, prenom, classe_id, success: true });
+  await logSubmission(req, { nom, prenom, classe_id, success: true });
   res.json({ success: true, no: data.no });
 });
 

@@ -35,7 +35,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
     if (btn.dataset.tab === "eleves") { loadStudents(); populateClasseFilter(); }
-    if (btn.dataset.tab === "journal") { loadLogs(); populateLogClasseFilter(); }
+    if (btn.dataset.tab === "journal") { populateLogClasseFilter(); loadLogs(); }
   });
 });
 
@@ -230,7 +230,7 @@ function retirer(id) {
 function restaurer(id) {
   const idx = deletedStudents.findIndex(s => s.id === id);
   if (idx === -1) return;
-  currentStudents.splice(idx, 0, deletedStudents.splice(idx, 1)[0]);
+  currentStudents.push(deletedStudents.splice(idx, 1)[0]);
   renderTable();
 }
 
@@ -301,7 +301,8 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
 });
 
 async function supprimerPermanent(id) {
-  await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
+  const res = await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
+  if (!res.ok) { alert("Erreur lors de la suppression"); return; }
   deletedStudents = deletedStudents.filter(s => s.id !== id);
   renderTable();
 }
@@ -323,7 +324,8 @@ async function viderClasseDepuisEleves() {
 
 async function viderClasse(classeId) {
   if (!confirm("Supprimer tous les élèves de cette classe ?")) return;
-  await fetch("/api/students/class/" + classeId, { method: "DELETE", headers: { "Authorization": token } });
+  const res = await fetch("/api/students/class/" + classeId, { method: "DELETE", headers: { "Authorization": token } });
+  if (!res.ok) { alert("Erreur lors du vidage de la classe"); return; }
   loadPromotions();
   loadStudents();
 }
@@ -331,7 +333,8 @@ async function viderClasse(classeId) {
 async function confirmDeleteAll() {
   if (!confirm("Tout supprimer définitivement ? Les élèves retirés seront effacés de la base.")) return;
   for (const s of deletedStudents) {
-    await fetch("/api/students/" + s.id, { method: "DELETE", headers: { "Authorization": token } });
+    const res = await fetch("/api/students/" + s.id, { method: "DELETE", headers: { "Authorization": token } });
+    if (!res.ok) { alert("Erreur lors de la suppression de " + s.nom + " " + s.prenom); continue; }
   }
   deletedStudents = [];
   renderTable();

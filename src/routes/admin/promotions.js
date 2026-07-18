@@ -69,6 +69,18 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/admin/promotions/:id
 router.delete("/:id", async (req, res) => {
+  // Get all classe IDs for this promotion
+  const { data: classes } = await supabaseAdmin
+    .from("classes").select("id").eq("promotion_id", req.params.id);
+  const ids = classes ? classes.map(c => c.id) : [];
+
+  // Delete students first, then pre_enrolled, then classes, then promotion
+  if (ids.length) {
+    await supabaseAdmin.from("students").delete().in("classe_id", ids);
+    await supabaseAdmin.from("pre_enrolled").delete().in("classe_id", ids);
+    await supabaseAdmin.from("submission_logs").delete().in("classe_id", ids);
+  }
+
   const { error: e1 } = await supabaseAdmin
     .from("classes").delete().eq("promotion_id", req.params.id);
   if (e1) return res.status(500).json({ error: e1.message });

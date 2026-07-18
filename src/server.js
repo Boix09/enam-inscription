@@ -1,6 +1,7 @@
 try { require("dotenv").config(); } catch (e) {}
 const express = require("express");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 const studentsRouter = require("./routes/students");
 const exportsRouter = require("./routes/exports");
 
@@ -8,6 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: "Trop de tentatives. Réessaie dans une minute." },
+  keyGenerator: (req) => req.ip || req.headers["x-forwarded-for"] || "unknown",
+});
+app.use("/api/students", limiter);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "landing.html"));

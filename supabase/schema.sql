@@ -63,6 +63,16 @@ CREATE INDEX IF NOT EXISTS idx_classes_promotion ON classes (promotion_id);
 CREATE INDEX IF NOT EXISTS idx_students_classe ON students (classe_id);
 CREATE INDEX IF NOT EXISTS idx_pre_enrolled_classe ON pre_enrolled (classe_id);
 
+CREATE TABLE IF NOT EXISTS settings (
+  id SERIAL PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,
+  value TEXT NOT NULL
+);
+
+INSERT INTO settings (key, value) VALUES ('whatsapp', '+50938817140') ON CONFLICT (key) DO NOTHING;
+
+GRANT SELECT ON TABLE settings TO anon;
+
 CREATE TABLE IF NOT EXISTS submission_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_nom TEXT,

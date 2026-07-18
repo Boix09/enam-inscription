@@ -100,7 +100,7 @@ async function generateExcel(students, info, logoBuf) {
   ws.mergeCells(row, 6, row + 1, 6);
   ws.mergeCells(row, 7, row, 9);
 
-  const h1Labels = ["NO", "NOM", "PRENOM", "TELEPHONE WHATSAP", "TELEPHONE APPEL", "ADRESSE", "PERSONNE A CONTACTER"];
+  const h1Labels = ["NO", "NOM", "PRENOM", "TELEPHONE WHATSAPP", "TELEPHONE APPEL", "ADRESSE", "PERSONNE A CONTACTER"];
   for (let i = 0; i < 7; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h1Labels[i];
@@ -110,7 +110,7 @@ async function generateExcel(students, info, logoBuf) {
 
   row++;
   const headerRow2 = ws.getRow(row);
-  const h2Labels = ["", "", "", "", "", "", "NOM", "LIEN DE PARENTE", "TELEPONNE"];
+  const h2Labels = ["", "", "", "", "", "", "NOM", "LIEN DE PARENTE", "TELEPHONE"];
   for (let i = 0; i < 9; i++) {
     const cell = ws.getCell(row, i + 1);
     cell.value = h2Labels[i];
