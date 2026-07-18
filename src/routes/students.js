@@ -78,8 +78,11 @@ router.delete("/class/:classeId", async (req, res) => {
 
   const { error } = await supabaseAdmin
     .from("students").delete().eq("classe_id", req.params.classeId);
-
   if (error) return res.status(500).json({ error: error.message });
+
+  await supabaseAdmin
+    .from("pre_enrolled").update({ registered: false }).eq("classe_id", req.params.classeId);
+
   res.json({ success: true });
 });
 
