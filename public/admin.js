@@ -164,7 +164,6 @@ function renderTable() {
       <td>${i + 1}</td>
       <td>${escHtml(s.nom)}</td>
       <td>${escHtml(s.prenom)}</td>
-      <td style="font-size:12px;color:var(--text-secondary)">${classeMap[s.classe_id] || ""}</td>
       <td>${escHtml(s.telephone_whatsapp || "")}</td>
       <td>${escHtml(s.telephone_appel || "")}</td>
       <td>${escHtml(s.adresse || "")}</td>
@@ -283,21 +282,18 @@ async function supprimerPermanent(id) {
   renderTable();
 }
 
-function viderClasseDepuisEleves() {
+async function viderClasseDepuisEleves() {
   const sel = document.getElementById("classeFilter");
-  if (sel && sel.value) { viderClasse(sel.value); return; }
-  // Calcule les classes qui ont des élèves
+  if (sel && sel.value) { await viderClasse(sel.value); return; }
   const classesAvecEleves = {};
   for (const s of currentStudents) {
     if (s.classe_id) classesAvecEleves[s.classe_id] = (classesAvecEleves[s.classe_id] || 0) + 1;
   }
   const ids = Object.keys(classesAvecEleves);
-  if (ids.length === 1) { viderClasse(ids[0]); return; }
+  if (ids.length === 1) { await viderClasse(ids[0]); return; }
   if (ids.length === 0) { alert("Aucun élève à supprimer"); return; }
-  const c = confirm(classeMap[ids[0]] + " (" + classesAvecEleves[ids[0]] + " élèves)\nCliquer OK pour vider cette classe, ANNULER pour vider TOUT");
-  if (c) { viderClasse(ids[0]); return; }
-  if (confirm("Vider TOUTES les classes ?")) {
-    ids.forEach(id => viderClasse(id));
+  if (confirm("Vider TOUTES les classes (" + ids.length + ") ?")) {
+    for (const id of ids) await viderClasse(id);
   }
 }
 
