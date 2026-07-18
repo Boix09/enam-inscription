@@ -17,14 +17,15 @@ router.post("/", async (req, res) => {
     return res.status(409).json({ error: "Cet élève est déjà inscrit dans cette classe." });
   }
 
-  if (telephone_whatsapp) {
+  if (telephone_whatsapp && classe_id) {
     const { data: telExists } = await supabaseAnon
       .from("students")
       .select("id")
       .eq("telephone_whatsapp", telephone_whatsapp)
+      .eq("classe_id", classe_id)
       .maybeSingle();
     if (telExists) {
-      return res.status(409).json({ error: "Ce numéro WhatsApp est déjà utilisé pour une autre inscription." });
+      return res.status(409).json({ error: "Ce numéro WhatsApp est déjà utilisé dans cette classe." });
     }
   }
 
