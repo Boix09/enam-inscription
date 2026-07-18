@@ -106,3 +106,17 @@ th { background: var(--header-bg); font-weight: 600; position: sticky; top: 0; }
   .admin-actions { flex-direction: column; }
   .admin-actions button { min-width: auto; }
 }
+
+.autocomplete-wrapper { position: relative; }
+.autocomplete-items {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-top: none; border-radius: 0 0 8px 8px; z-index: 10;
+  display: none; max-height: 200px; overflow-y: auto;
+}
+.autocomplete-items div {
+  padding: 8px 12px; cursor: pointer; font-size: 14px;
+  border-bottom: 1px solid var(--border); color: var(--text);
+}
+.autocomplete-items div:last-child { border-bottom: none; }
+.autocomplete-items div:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }

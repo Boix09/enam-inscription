@@ -20,7 +20,10 @@
     <div class="form-section">
       <h4>Informations personnelles</h4>
       <label>Nom <span class="required">*</span></label>
-      <input type="text" id="nom" required>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="nom" required autocomplete="off">
+        <div id="autocomplete-list" class="autocomplete-items"></div>
+      </div>
 
       <label>Prénom <span class="required">*</span></label>
       <input type="text" id="prenom" required>

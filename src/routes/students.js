@@ -9,6 +9,28 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Nom et prénom sont obligatoires" });
   }
 
+  const { data: existing } = await supabaseAnon
+    .from("students")
+    .select("id")
+    .eq("nom", nom)
+    .eq("prenom", prenom)
+    .maybeSingle();
+
+  if (existing) {
+    return res.status(409).json({ error: "Cet élève est déjà inscrit." });
+  }
+
+  if (telephone_whatsapp) {
+    const { data: telExists } = await supabaseAnon
+      .from("students")
+      .select("id")
+      .eq("telephone_whatsapp", telephone_whatsapp)
+      .maybeSingle();
+    if (telExists) {
+      return res.status(409).json({ error: "Ce numéro WhatsApp est déjà utilisé pour une autre inscription." });
+    }
+  }
+
   const { data, error } = await supabaseAnon
     .from("students")
     .insert([{
@@ -22,6 +44,12 @@ router.post("/", async (req, res) => {
     console.error("Erreur insertion:", error);
     return res.status(500).json({ error: "Erreur lors de l'enregistrement. Vérifie ta connexion et réessaie." });
   }
+
+  await supabaseAnon
+    .from("pre_enrolled")
+    .update({ registered: true })
+    .eq("nom", nom)
+    .eq("prenom", prenom);
 
   res.json({ success: true, no: data.no });
 });
