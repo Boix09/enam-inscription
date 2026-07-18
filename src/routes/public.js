@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
-const { supabaseAnon } = require("../db");
+const { supabaseAnon, supabaseAdmin } = require("../db");
 
 // GET /renseignements/:promoSlug/:classeSlug → serve form
 router.get("/renseignements/:promoSlug/:classeSlug", (req, res) => {
@@ -9,6 +9,27 @@ router.get("/renseignements/:promoSlug/:classeSlug", (req, res) => {
 });
 
 // GET /api/context?promo_slug=X&classe_slug=Y
+// PUT /api/settings/whatsapp — update (admin)
+router.put("/api/settings/whatsapp", async (req, res) => {
+  if (req.headers.authorization !== process.env.ADMIN_PASSWORD)
+    return res.status(401).json({ error: "Non autorisé" });
+  const { value } = req.body;
+  if (!value) return res.status(400).json({ error: "Numéro requis" });
+
+  const { error } = await supabaseAdmin
+    .from("settings").upsert({ key: "whatsapp", value }, { onConflict: "key" });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// GET /api/settings/whatsapp
+router.get("/api/settings/whatsapp", async (req, res) => {
+  const { data } = await supabaseAnon
+    .from("settings").select("value").eq("key", "whatsapp").single();
+  res.json({ whatsapp: data?.value || "+50938817140" });
+});
+
 router.get("/api/context", async (req, res) => {
   const { promo_slug, classe_slug } = req.query;
   if (!promo_slug || !classe_slug)

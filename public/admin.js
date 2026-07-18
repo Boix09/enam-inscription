@@ -19,6 +19,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     loadPromotions();
     loadStudents();
     populateClasseFilter();
+    loadWhatsapp();
   } catch (err) {
     document.getElementById("loginError").textContent = "Erreur de connexion";
     document.getElementById("loginError").style.display = "block";
@@ -38,6 +39,28 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
 });
 
 // --- Promotions ---
+async function loadWhatsapp() {
+  try {
+    const res = await fetch("/api/settings/whatsapp");
+    const d = await res.json();
+    document.getElementById("whatsappSetting").value = d.whatsapp;
+  } catch(e) {}
+}
+
+async function saveWhatsapp() {
+  const val = document.getElementById("whatsappSetting").value.trim();
+  const msg = document.getElementById("whatsappMsg");
+  try {
+    const res = await fetch("/api/settings/whatsapp", {
+      method: "PUT",
+      headers: { "Authorization": token, "Content-Type": "application/json" },
+      body: JSON.stringify({ value: val }),
+    });
+    msg.textContent = res.ok ? "Sauvegardé ✓" : (await res.json()).error;
+    msg.style.color = res.ok ? "var(--success-text)" : "var(--error-text)";
+  } catch(e) { msg.textContent = "Erreur réseau"; msg.style.color = "var(--error-text)"; }
+}
+
 async function loadPromotions() {
   try {
     const res = await fetch("/api/admin/promotions", { headers: { "Authorization": token } });
