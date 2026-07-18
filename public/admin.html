@@ -43,16 +43,21 @@
         </select>
         <button onclick="exportWord()" class="btn-secondary">Word</button>
         <button onclick="exportExcel()" class="btn-secondary">Excel</button>
-        <button onclick="exportSelectedWord()" class="btn-secondary">Word (sélection)</button>
-        <button onclick="exportSelectedExcel()" class="btn-secondary">Excel (sélection)</button>
-        <button onclick="deleteSelected()" class="btn-secondary danger">Supprimer</button>
         <span id="loadingIndicator" style="display:none">Chargement...</span>
       </div>
       <div class="table-wrapper">
         <table id="studentsTable">
-          <thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleAll()"></th><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th><th>Action</th></tr></thead>
+          <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
+      </div>
+      <div id="deletedSection" style="display:none;margin-top:16px">
+        <h4 style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Élèves retirés</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>Action</th></tr></thead>
+          <tbody id="deletedTable"></tbody>
+        </table>
+        <button onclick="confirmDeleteAll()" class="btn-secondary danger" style="margin-top:8px;width:auto">Tout supprimer définitivement</button>
       </div>
     </div>
   </div>

@@ -128,6 +128,7 @@ document.getElementById("promoForm").addEventListener("submit", async (e) => {
 
 // --- Students / Exports ---
 let currentStudents = [];
+let deletedStudents = [];
 
 async function loadStudents() {
   const tbody = document.querySelector("#studentsTable tbody");
@@ -136,22 +137,64 @@ async function loadStudents() {
     const url = "/api/students" + (classeId ? "?classe_id=" + classeId : "");
     const res = await fetch(url, { headers: { "Authorization": token } });
     currentStudents = await res.json();
-    tbody.innerHTML = currentStudents.map(s => `
-      <tr>
-        <td><input type="checkbox" class="student-check" value="${s.id}"></td>
-        <td>${s.no}</td>
-        <td>${escHtml(s.nom)}</td>
-        <td>${escHtml(s.prenom)}</td>
-        <td>${escHtml(s.telephone_whatsapp || "")}</td>
-        <td>${escHtml(s.telephone_appel || "")}</td>
-        <td>${escHtml(s.adresse || "")}</td>
-        <td>${escHtml(s.contact_nom || "")}</td>
-        <td>${escHtml(s.contact_lien || "")}</td>
-        <td>${escHtml(s.contact_telephone || "")}</td>
-        <td><button class="btn-tiny danger" onclick="deleteStudent('${s.id}')">✕</button></td>
-      </tr>
-    `).join("");
-  } catch(e) { tbody.innerHTML = "<tr><td colspan='11'>Erreur chargement</td></tr>"; }
+    renderTable();
+  } catch(e) { tbody.innerHTML = "<tr><td colspan='10'>Erreur chargement</td></tr>"; }
+}
+
+function renderTable() {
+  const tbody = document.querySelector("#studentsTable tbody");
+  tbody.innerHTML = currentStudents.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${escHtml(s.nom)}</td>
+      <td>${escHtml(s.prenom)}</td>
+      <td>${escHtml(s.telephone_whatsapp || "")}</td>
+      <td>${escHtml(s.telephone_appel || "")}</td>
+      <td>${escHtml(s.adresse || "")}</td>
+      <td>${escHtml(s.contact_nom || "")}</td>
+      <td>${escHtml(s.contact_lien || "")}</td>
+      <td>${escHtml(s.contact_telephone || "")}</td>
+      <td><button class="btn-tiny danger" onclick="retirer('${s.id}')">✕</button></td>
+    </tr>
+  `).join("");
+
+  const dtbody = document.getElementById("deletedTable");
+  if (deletedStudents.length === 0) {
+    document.getElementById("deletedSection").style.display = "none";
+    return;
+  }
+  document.getElementById("deletedSection").style.display = "block";
+  dtbody.innerHTML = deletedStudents.map((s, i) => `
+    <tr style="opacity:0.7">
+      <td>${i + 1}</td>
+      <td>${escHtml(s.nom)}</td>
+      <td>${escHtml(s.prenom)}</td>
+      <td><button class="btn-tiny" onclick="restaurer('${s.id}')">Restaurer</button></td>
+    </tr>
+  `).join("");
+}
+
+function retirer(id) {
+  const idx = currentStudents.findIndex(s => s.id === id);
+  if (idx === -1) return;
+  deletedStudents.push(currentStudents.splice(idx, 1)[0]);
+  renderTable();
+}
+
+function restaurer(id) {
+  const idx = deletedStudents.findIndex(s => s.id === id);
+  if (idx === -1) return;
+  currentStudents.splice(idx, 0, deletedStudents.splice(idx, 1)[0]);
+  renderTable();
+}
+
+async function confirmDeleteAll() {
+  if (!confirm("Tout supprimer définitivement ? Les élèves retirés seront effacés de la base.")) return;
+  for (const s of deletedStudents) {
+    await fetch("/api/students/" + s.id, { method: "DELETE", headers: { "Authorization": token } });
+  }
+  deletedStudents = [];
+  renderTable();
 }
 
 async function populateClasseFilter() {
@@ -168,28 +211,6 @@ async function populateClasseFilter() {
   } catch(e) {}
 }
 
-function getSelectedIds() {
-  return Array.from(document.querySelectorAll(".student-check:checked")).map(cb => cb.value);
-}
-
-function toggleAll() {
-  const checked = document.getElementById("selectAll").checked;
-  document.querySelectorAll(".student-check").forEach(cb => cb.checked = checked);
-}
-
-async function deleteSelected() {
-  const ids = getSelectedIds();
-  if (!ids.length) return alert("Sélectionne des élèves d'abord");
-  if (!confirm("Supprimer " + ids.length + " élève(s) ?")) return;
-  for (const id of ids) await deleteStudent(id, true);
-  loadStudents();
-}
-
-async function deleteStudent(id, silent) {
-  const res = await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
-  if (!res.ok && !silent) alert("Erreur lors de la suppression");
-}
-
 function getExportSuffix() {
   const sel = document.getElementById("classeFilter");
   if (!sel || !sel.value) return "";
@@ -201,14 +222,6 @@ function buildExportUrl(base) {
   const params = new URLSearchParams();
   const classeId = document.getElementById("classeFilter")?.value || "";
   if (classeId) params.set("classe_id", classeId);
-  return base + "?" + params.toString();
-}
-
-function buildExportUrlSelected(base) {
-  const ids = getSelectedIds();
-  if (!ids.length) { alert("Sélectionne des élèves d'abord"); return null; }
-  const params = new URLSearchParams();
-  params.set("ids", ids.join(","));
   return base + "?" + params.toString();
 }
 
@@ -231,32 +244,6 @@ async function exportExcel() {
     const res = await fetch(buildExportUrl("/api/exports/excel"), { headers: { "Authorization": token } });
     if (!res.ok) { alert("Erreur d'export"); return; }
     downloadBlob(await res.blob(), "fiche_renseignements_ENAM" + getExportSuffix() + ".xlsx");
-  } finally { ind.style.display = "none"; }
-}
-
-async function exportSelectedWord() {
-  if (!token) return;
-  const url = buildExportUrlSelected("/api/exports/word");
-  if (!url) return;
-  const ind = document.getElementById("loadingIndicator");
-  ind.style.display = "inline";
-  try {
-    const res = await fetch(url, { headers: { "Authorization": token } });
-    if (!res.ok) { alert("Erreur d'export"); return; }
-    downloadBlob(await res.blob(), "fiche_renseignements_ENAM_selection.docx");
-  } finally { ind.style.display = "none"; }
-}
-
-async function exportSelectedExcel() {
-  if (!token) return;
-  const url = buildExportUrlSelected("/api/exports/excel");
-  if (!url) return;
-  const ind = document.getElementById("loadingIndicator");
-  ind.style.display = "inline";
-  try {
-    const res = await fetch(url, { headers: { "Authorization": token } });
-    if (!res.ok) { alert("Erreur d'export"); return; }
-    downloadBlob(await res.blob(), "fiche_renseignements_ENAM_selection.xlsx");
   } finally { ind.style.display = "none"; }
 }
 
