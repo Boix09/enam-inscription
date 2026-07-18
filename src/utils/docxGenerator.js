@@ -1,100 +1,85 @@
 const {
-  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  WidthType, AlignmentType, BorderStyle, VerticalMergeType,
-  ShadingType, PageOrientation
+  Document, Packer, Paragraph, Table, TableRow, TableCell,
+  WidthType, PageOrientation, TextRun, AlignmentType, BorderStyle,
+  ShadingType, VerticalMergeType
 } = require("docx");
 
-const PAGE_LANDSCAPE_WIDTH = 15840;
 const MARGIN = 720;
-const AVAILABLE_WIDTH = PAGE_LANDSCAPE_WIDTH - MARGIN * 2;
+const PAGE_WIDTH_LANDSCAPE = 15840 - MARGIN * 2;
 
-const COL_RATIOS = {
-  no: 500, nom: 1500, prenom: 1700, whatsapp: 2000, appel: 2000,
-  adresse: 2600, contactNom: 1700, lien: 1600, tel: 1700,
-};
-const RATIO_TOTAL = Object.values(COL_RATIOS).reduce((a, b) => a + b, 0);
-
-function colWidths() {
-  const w = {};
-  for (const [k, v] of Object.entries(COL_RATIOS))
-    w[k] = Math.round(AVAILABLE_WIDTH * v / RATIO_TOTAL);
-  return w;
-}
+const COL_WIDTHS = [
+  600,  // NO
+  1600, // NOM
+  1600, // PRENOM
+  2000, // TEL WHATSAPP
+  2000, // TEL APPEL
+  2800, // ADRESSE
+  1400, // NOM (contact)
+  1200, // LIEN DE PARENTE
+  1200, // TELEPONNE
+];
 
 const BORDER = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
 const CELL_BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 
-function headerCell(text, opts = {}) {
+function cell(text, opts = {}) {
   return new TableCell({
     borders: CELL_BORDERS,
-    width: { size: opts.width, type: WidthType.DXA },
+    width: { size: COL_WIDTHS[opts.colIndex], type: WidthType.DXA },
     columnSpan: opts.colSpan,
     verticalMerge: opts.vMerge,
     verticalAlign: "center",
     shading: opts.shaded ? { type: ShadingType.CLEAR, fill: "D9D9D9" } : undefined,
     children: [new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 40, after: 40 },
-      children: [new TextRun({ text, bold: true, size: 18 })],
-    })],
-  });
-}
-
-function dataCell(text, width) {
-  return new TableCell({
-    borders: CELL_BORDERS,
-    width: { size: width, type: WidthType.DXA },
-    verticalAlign: "center",
-    children: [new Paragraph({
+      alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
       spacing: { before: 20, after: 20 },
-      children: [new TextRun({ text: text || "", size: 18 })],
+      children: [new TextRun({ text, bold: !!opts.bold, size: 18 })],
     })],
   });
 }
 
 async function generateDocx(students) {
-  const COL = colWidths();
-  const totalWidth = Object.values(COL).reduce((a, b) => a + b, 0);
+  const totalWidth = COL_WIDTHS.reduce((a, b) => a + b, 0);
 
   const headerRow1 = new TableRow({
     tableHeader: true,
     children: [
-      headerCell("NO", { width: COL.no, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("NOM", { width: COL.nom, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("PRENOM", { width: COL.prenom, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("TELEPHONE WHATSAP", { width: COL.whatsapp, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("TELEPHONE APPEL", { width: COL.appel, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("ADRESSE", { width: COL.adresse, vMerge: VerticalMergeType.RESTART, shaded: true }),
-      headerCell("PERSONNE A CONTACTER", { width: COL.contactNom + COL.lien + COL.tel, colSpan: 3, shaded: true }),
+      cell("NO", { colIndex: 0, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("NOM", { colIndex: 1, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("PRENOM", { colIndex: 2, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("TELEPHONE WHATSAP", { colIndex: 3, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("TELEPHONE APPEL", { colIndex: 4, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("ADRESSE", { colIndex: 5, vMerge: VerticalMergeType.RESTART, shaded: true, center: true, bold: true }),
+      cell("PERSONNE A CONTACTER", { colIndex: 6, colSpan: 3, shaded: true, center: true, bold: true }),
     ],
   });
 
   const headerRow2 = new TableRow({
     tableHeader: true,
     children: [
-      headerCell("", { width: COL.no, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("", { width: COL.nom, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("", { width: COL.prenom, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("", { width: COL.whatsapp, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("", { width: COL.appel, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("", { width: COL.adresse, vMerge: VerticalMergeType.CONTINUE }),
-      headerCell("NOM", { width: COL.contactNom, shaded: true }),
-      headerCell("LIEN DE PARENTE", { width: COL.lien, shaded: true }),
-      headerCell("TELEPONNE", { width: COL.tel, shaded: true }),
+      cell("", { colIndex: 0, vMerge: VerticalMergeType.CONTINUE }),
+      cell("", { colIndex: 1, vMerge: VerticalMergeType.CONTINUE }),
+      cell("", { colIndex: 2, vMerge: VerticalMergeType.CONTINUE }),
+      cell("", { colIndex: 3, vMerge: VerticalMergeType.CONTINUE }),
+      cell("", { colIndex: 4, vMerge: VerticalMergeType.CONTINUE }),
+      cell("", { colIndex: 5, vMerge: VerticalMergeType.CONTINUE }),
+      cell("NOM", { colIndex: 6, shaded: true, center: true, bold: true }),
+      cell("LIEN DE PARENTE", { colIndex: 7, shaded: true, center: true, bold: true }),
+      cell("TELEPONNE", { colIndex: 8, shaded: true, center: true, bold: true }),
     ],
   });
 
   const dataRows = students.map(s => new TableRow({
     children: [
-      dataCell(String(s.no), COL.no),
-      dataCell(s.nom, COL.nom),
-      dataCell(s.prenom, COL.prenom),
-      dataCell(s.telephone_whatsapp || "", COL.whatsapp),
-      dataCell(s.telephone_appel || "", COL.appel),
-      dataCell(s.adresse || "", COL.adresse),
-      dataCell(s.contact_nom || "", COL.contactNom),
-      dataCell(s.contact_lien || "", COL.lien),
-      dataCell(s.contact_telephone || "", COL.tel),
+      cell(String(s.no), { colIndex: 0, center: true }),
+      cell(s.nom, { colIndex: 1 }),
+      cell(s.prenom, { colIndex: 2 }),
+      cell(s.telephone_whatsapp || "", { colIndex: 3 }),
+      cell(s.telephone_appel || "", { colIndex: 4 }),
+      cell(s.adresse || "", { colIndex: 5 }),
+      cell(s.contact_nom || "", { colIndex: 6 }),
+      cell(s.contact_lien || "", { colIndex: 7 }),
+      cell(s.contact_telephone || "", { colIndex: 8 }),
     ],
   }));
 
@@ -102,8 +87,8 @@ async function generateDocx(students) {
     sections: [{
       properties: {
         page: {
-          orientation: PageOrientation.LANDSCAPE,
-          margin: { top: 720, bottom: 720, left: 720, right: 720 },
+          size: { width: 12240, height: 15840, orientation: PageOrientation.LANDSCAPE },
+          margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN },
         },
       },
       children: [
@@ -115,21 +100,16 @@ async function generateDocx(students) {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { after: 0 },
-          children: [new TextRun({ text: "ENAM", bold: true, size: 28 })],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 120 },
-          children: [new TextRun({ text: "APPROCHE PAR COMPETENCE (APC) DIPLOME TECHNIQUE", bold: true, size: 22 })],
+          children: [new TextRun({ text: "ENAM", bold: true, size: 26 })],
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { after: 200 },
-          children: [new TextRun({ text: "TECHNIQUES RESEAUX INFORMATIQUE PROMOTION 2024-2027", bold: true, size: 24 })],
+          children: [new TextRun({ text: "FICHE DE RENSEIGNEMENTS", bold: true, size: 22 })],
         }),
         new Table({
           width: { size: totalWidth, type: WidthType.DXA },
-          columnWidths: Object.values(COL),
+          columnWidths: COL_WIDTHS,
           rows: [headerRow1, headerRow2, ...dataRows],
         }),
       ],
