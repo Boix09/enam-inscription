@@ -56,6 +56,7 @@ async function loadPromotions() {
               <span class="classe-count">${c.eleves} élèves</span>
               <code class="classe-link">https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}</code>
               <button class="btn-tiny" onclick="copyLink('https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}')">Copier</button>
+              ${c.eleves > 0 ? `<button class="btn-tiny danger" onclick="viderClasse('${c.id}')">Vider</button>` : ""}
             </div>
           `).join("")}
         </div>
@@ -169,7 +170,10 @@ function renderTable() {
       <td>${i + 1}</td>
       <td>${escHtml(s.nom)}</td>
       <td>${escHtml(s.prenom)}</td>
-      <td><button class="btn-tiny" onclick="restaurer('${s.id}')">Restaurer</button></td>
+      <td>
+        <button class="btn-tiny" onclick="restaurer('${s.id}')">Restaurer</button>
+        <button class="btn-tiny danger" onclick="supprimerPermanent('${s.id}')">✕</button>
+      </td>
     </tr>
   `).join("");
 }
@@ -186,6 +190,19 @@ function restaurer(id) {
   if (idx === -1) return;
   currentStudents.splice(idx, 0, deletedStudents.splice(idx, 1)[0]);
   renderTable();
+}
+
+async function supprimerPermanent(id) {
+  await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
+  deletedStudents = deletedStudents.filter(s => s.id !== id);
+  renderTable();
+}
+
+async function viderClasse(classeId) {
+  if (!confirm("Supprimer tous les élèves de cette classe ?")) return;
+  await fetch("/api/students/class/" + classeId, { method: "DELETE", headers: { "Authorization": token } });
+  loadPromotions();
+  loadStudents();
 }
 
 async function confirmDeleteAll() {

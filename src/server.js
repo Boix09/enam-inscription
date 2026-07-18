@@ -9,10 +9,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.redirect("/renseignements/reseaux-informatique-2024-2027/1ere-annee");
-});
-
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use("/api/students", studentsRouter);

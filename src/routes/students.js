@@ -70,6 +70,19 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// DELETE /api/students/class/:classeId — supprimer tous les élèves d'une classe
+router.delete("/class/:classeId", async (req, res) => {
+  const password = req.headers.authorization;
+  if (password !== process.env.ADMIN_PASSWORD)
+    return res.status(401).json({ error: "Non autorisé" });
+
+  const { error } = await supabaseAdmin
+    .from("students").delete().eq("classe_id", req.params.classeId);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // DELETE /api/students/:id — supprimer un élève (admin)
 router.delete("/:id", async (req, res) => {
   const password = req.headers.authorization;
