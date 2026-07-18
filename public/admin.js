@@ -56,7 +56,7 @@ async function loadPromotions() {
               <span class="classe-count">${c.eleves} élèves</span>
               <code class="classe-link">https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}</code>
               <button class="btn-tiny" onclick="copyLink('https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}')">Copier</button>
-              ${c.eleves > 0 ? `<button class="btn-tiny danger" onclick="viderClasse('${c.id}')">Vider</button>` : ""}
+              <button class="btn-tiny danger" onclick="viderClasse('${c.id}')">Vider</button>
             </div>
           `).join("")}
         </div>
@@ -265,6 +265,12 @@ async function supprimerPermanent(id) {
   await fetch("/api/students/" + id, { method: "DELETE", headers: { "Authorization": token } });
   deletedStudents = deletedStudents.filter(s => s.id !== id);
   renderTable();
+}
+
+function viderClasseDepuisEleves() {
+  const sel = document.getElementById("classeFilter");
+  if (!sel || !sel.value) { alert("Sélectionne d'abord une classe dans le filtre"); return; }
+  viderClasse(sel.value);
 }
 
 async function viderClasse(classeId) {
