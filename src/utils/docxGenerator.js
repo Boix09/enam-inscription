@@ -81,7 +81,7 @@ async function generateDocx(students, info, logoBuf) {
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
-      children: [new ImageRun({ data: logoBuf, transformation: { width: 80, height: 80 } })],
+      children: [new ImageRun({ data: logoBuf, type: "jpeg", transformation: { width: 80, height: 80 } })],
     }));
   }
 
