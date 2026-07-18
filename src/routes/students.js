@@ -3,21 +3,18 @@ const router = express.Router();
 const { supabaseAnon, supabaseAdmin } = require("../db");
 
 router.post("/", async (req, res) => {
-  const { nom, prenom, telephone_whatsapp, telephone_appel, adresse, contact_nom, contact_lien, contact_telephone } = req.body;
+  const { nom, prenom, telephone_whatsapp, telephone_appel, adresse, contact_nom, contact_lien, contact_telephone, classe_id } = req.body;
 
   if (!nom || !prenom) {
     return res.status(400).json({ error: "Nom et prénom sont obligatoires" });
   }
 
-  const { data: existing } = await supabaseAnon
-    .from("students")
-    .select("id")
-    .eq("nom", nom)
-    .eq("prenom", prenom)
-    .maybeSingle();
+  const query = supabaseAnon.from("students").select("id").eq("nom", nom).eq("prenom", prenom);
+  if (classe_id) query.eq("classe_id", classe_id);
 
+  const { data: existing } = await query.maybeSingle();
   if (existing) {
-    return res.status(409).json({ error: "Cet élève est déjà inscrit." });
+    return res.status(409).json({ error: "Cet élève est déjà inscrit dans cette classe." });
   }
 
   if (telephone_whatsapp) {
@@ -35,7 +32,7 @@ router.post("/", async (req, res) => {
     .from("students")
     .insert([{
       nom, prenom, telephone_whatsapp, telephone_appel,
-      adresse, contact_nom, contact_lien, contact_telephone
+      adresse, contact_nom, contact_lien, contact_telephone, classe_id
     }])
     .select("no")
     .single();
@@ -45,11 +42,9 @@ router.post("/", async (req, res) => {
     return res.status(500).json({ error: "Erreur lors de l'enregistrement. Vérifie ta connexion et réessaie." });
   }
 
-  await supabaseAnon
-    .from("pre_enrolled")
-    .update({ registered: true })
-    .eq("nom", nom)
-    .eq("prenom", prenom);
+  const preQuery = supabaseAnon.from("pre_enrolled").update({ registered: true }).eq("nom", nom).eq("prenom", prenom);
+  if (classe_id) preQuery.eq("classe_id", classe_id);
+  await preQuery;
 
   res.json({ success: true, no: data.no });
 });
@@ -60,10 +55,11 @@ router.get("/", async (req, res) => {
     return res.status(401).json({ error: "Non autorisé" });
   }
 
-  const { data, error } = await supabaseAdmin
-    .from("students")
-    .select("*")
-    .order("no", { ascending: true });
+  const query = supabaseAdmin.from("students").select("*, classe_id");
+  if (req.query.classe_id) query.eq("classe_id", req.query.classe_id);
+  query.order("no", { ascending: true });
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Erreur lecture:", error);

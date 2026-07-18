@@ -23,19 +23,71 @@
   </div>
 
   <div id="adminSection" style="display:none">
-    <div class="admin-actions">
-      <button onclick="exportWord()">Exporter en Word</button>
-      <button onclick="exportExcel()">Exporter en Excel</button>
-      <span id="loadingIndicator" style="display:none">Chargement...</span>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="promotions">Promotions</button>
+      <button class="tab-btn" data-tab="eleves">Élèves</button>
     </div>
-    <div class="table-wrapper">
-      <table id="studentsTable">
-        <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th></tr></thead>
-        <tbody></tbody>
-      </table>
+
+    <!-- Tab Promotions -->
+    <div id="tab-promotions" class="tab-content">
+      <button onclick="showCreatePromo()" class="btn-secondary">+ Nouvelle promotion</button>
+      <div id="promotionsList" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Tab Élèves -->
+    <div id="tab-eleves" class="tab-content" style="display:none">
+      <div class="admin-actions">
+        <select id="classeFilter" onchange="loadStudents()">
+          <option value="">Toutes les classes</option>
+        </select>
+        <button onclick="exportWord()">Word</button>
+        <button onclick="exportExcel()">Excel</button>
+        <span id="loadingIndicator" style="display:none">Chargement...</span>
+      </div>
+      <div class="table-wrapper">
+        <table id="studentsTable">
+          <thead><tr><th>NO</th><th>NOM</th><th>PRENOM</th><th>WhatsApp</th><th>Appel</th><th>Adresse</th><th>Contact Nom</th><th>Lien</th><th>Contact Tél</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Modal Create Promotion -->
+<div id="promoModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h3>Nouvelle promotion</h3>
+    <form id="promoForm">
+      <label>Nom de la formation</label>
+      <input type="text" id="promoNom" required placeholder="Réseaux Informatique">
+
+      <div style="display:flex; gap:12px">
+        <div style="flex:1">
+          <label>Année début</label>
+          <input type="number" id="promoAnneeDebut" required value="2025">
+        </div>
+        <div style="flex:1">
+          <label>Année fin</label>
+          <input type="number" id="promoAnneeFin" required value="2028">
+        </div>
+      </div>
+
+      <label>Description</label>
+      <textarea id="promoDescription" rows="2" placeholder="Optionnel"></textarea>
+
+      <label>Nombre de classes</label>
+      <input type="number" id="classCount" min="1" max="10" value="3" onchange="updateClassInputs()">
+
+      <div id="classInputs"></div>
+
+      <button type="submit">Créer la promotion</button>
+      <p id="promoMsg" class="message" style="display:none"></p>
+    </form>
+  </div>
+</div>
+
 <script src="admin.js"></script>
 </body>
 </html>

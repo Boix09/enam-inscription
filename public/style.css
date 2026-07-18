@@ -120,3 +120,61 @@ th { background: var(--header-bg); font-weight: 600; position: sticky; top: 0; }
 }
 .autocomplete-items div:last-child { border-bottom: none; }
 .autocomplete-items div:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
+.tab-btn {
+  flex: 1; padding: 10px; font-size: 14px; font-weight: 600;
+  background: transparent; color: var(--text-secondary); border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.promo-card {
+  background: var(--input-bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 12px;
+}
+.promo-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 15px; margin-bottom: 8px;
+}
+.promo-classes { display: flex; flex-direction: column; gap: 6px; }
+.classe-row {
+  display: flex; align-items: center; gap: 8px; font-size: 13px;
+  flex-wrap: wrap;
+}
+.classe-link {
+  font-size: 12px; background: var(--surface); padding: 2px 6px;
+  border-radius: 4px; border: 1px solid var(--border); flex: 1; min-width: 200px;
+  word-break: break-all; color: var(--accent);
+}
+.classe-count { color: var(--text-secondary); white-space: nowrap; }
+.btn-small { padding: 4px 10px; font-size: 12px; width: auto; margin: 0; }
+.btn-secondary {
+  background: transparent; border: 1px solid var(--accent); color: var(--accent);
+  padding: 8px 16px; font-size: 13px; font-weight: 600; width: auto; margin: 0;
+}
+.btn-secondary:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.btn-tiny {
+  padding: 2px 8px; font-size: 11px; width: auto; margin: 0;
+  background: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer;
+}
+
+.modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-content {
+  background: var(--surface); border-radius: 12px; padding: 24px;
+  max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;
+}
+.modal-close { float: right; font-size: 24px; cursor: pointer; color: var(--text-secondary); }
+.modal-close:hover { color: var(--text); }
+
+select#classeFilter {
+  padding: 8px 12px; font-size: 14px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--input-bg); color: var(--text);
+  min-width: 200px; flex: 1;
+}

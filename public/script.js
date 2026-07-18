@@ -6,6 +6,24 @@ const prenomInput = document.getElementById("prenom");
 const list = document.getElementById("autocomplete-list");
 
 let selectedPreEnrolled = null;
+let contexte = null; // { promotion: {nom,...}, classe: {id, nom} }
+
+// Détecter si on est sur une URL slug
+async function detecterContexte() {
+  const path = window.location.pathname;
+  const match = path.match(/\/renseignements\/([^/]+)\/([^/]+)/);
+  if (!match) return;
+
+  try {
+    const res = await fetch(`/api/context?promo_slug=${encodeURIComponent(match[1])}&classe_slug=${encodeURIComponent(match[2])}`);
+    if (!res.ok) return;
+    contexte = await res.json();
+    const info = document.getElementById("promoInfo");
+    info.innerHTML = `<h3>${escHtml(contexte.promotion.nom)} (${contexte.promotion.annee_debut}-${contexte.promotion.annee_fin})<br><span style="font-size:14px;opacity:.8">${escHtml(contexte.classe.nom)}</span></h3>`;
+  } catch(_) {}
+}
+
+detecterContexte();
 
 function showMessage(text, type) {
   msg.textContent = text;
@@ -20,7 +38,9 @@ nomInput.addEventListener("input", () => {
   if (q.length < 1) { list.innerHTML = ""; list.style.display = "none"; return; }
   acTimeout = setTimeout(async () => {
     try {
-      const res = await fetch("/api/pre-enrolled?q=" + encodeURIComponent(q));
+      let url = "/api/pre-enrolled?q=" + encodeURIComponent(q);
+      if (contexte) url += "&classe_id=" + encodeURIComponent(contexte.classe.id);
+      const res = await fetch(url);
       const data = await res.json();
       list.innerHTML = "";
       if (data.length === 0) { list.style.display = "none"; return; }
@@ -66,6 +86,8 @@ form.addEventListener("submit", async (e) => {
     contact_telephone: document.getElementById("contact_telephone").value.trim(),
   };
 
+  if (contexte) payload.classe_id = contexte.classe.id;
+
   if (!payload.nom || !payload.prenom) {
     showMessage("Nom et prénom sont obligatoires.", "error");
     submitBtn.disabled = false;
@@ -106,3 +128,9 @@ form.addEventListener("submit", async (e) => {
     submitBtn.textContent = "Envoyer";
   }
 });
+
+function escHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}

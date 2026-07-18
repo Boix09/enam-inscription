@@ -4,12 +4,11 @@ const { supabaseAdmin } = require("../db");
 const { generateDocx } = require("../utils/docxGenerator");
 const { generateExcel } = require("../utils/excelGenerator");
 
-async function getStudents(password) {
+async function getStudents(password, classe_id) {
   if (password !== process.env.ADMIN_PASSWORD) return null;
-  const { data, error } = await supabaseAdmin
-    .from("students")
-    .select("*")
-    .order("no", { ascending: true });
+  const query = supabaseAdmin.from("students").select("*");
+  if (classe_id) query.eq("classe_id", classe_id);
+  const { data, error } = await query.order("no", { ascending: true });
   if (error) throw error;
   return data;
 }
@@ -17,7 +16,7 @@ async function getStudents(password) {
 router.get("/word", async (req, res) => {
   try {
     const pw = req.headers.authorization;
-    const students = await getStudents(pw);
+    const students = await getStudents(pw, req.query.classe_id);
     if (!students) return res.status(401).json({ error: "Non autorisé" });
 
     const buffer = await generateDocx(students);
@@ -33,7 +32,7 @@ router.get("/word", async (req, res) => {
 router.get("/excel", async (req, res) => {
   try {
     const pw = req.headers.authorization;
-    const students = await getStudents(pw);
+    const students = await getStudents(pw, req.query.classe_id);
     if (!students) return res.status(401).json({ error: "Non autorisé" });
 
     const buffer = await generateExcel(students);
