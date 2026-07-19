@@ -27,7 +27,7 @@
 
   <div id="adminSection" style="display:none">
     <div class="tabs">
-      <button class="tab-btn active" data-tab="promotions">Promotions</button>
+      <button class="tab-btn active" data-tab="promotions">Formulaires</button>
       <button class="tab-btn" data-tab="eleves">Élèves</button>
       <button class="tab-btn" data-tab="preinscrits" id="preTab" style="display:none">Pré-inscrits</button>
       <button class="tab-btn" data-tab="journal">Journal</button>
@@ -35,7 +35,7 @@
 
     <!-- Tab Promotions -->
     <div id="tab-promotions" class="tab-content">
-      <button onclick="showCreatePromo()" class="btn-secondary">+ Nouvelle promotion</button>
+      <button onclick="showCreatePromo()" class="btn-secondary">+ Nouveau formulaire</button>
       <div style="margin-top:12px;padding:12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
         <label style="font-size:13px;font-weight:600">Numéro WhatsApp pour la page d'accueil</label>
         <div style="display:flex;gap:8px;margin-top:4px">
@@ -79,7 +79,7 @@
         </div>
         <button onclick="exportWord()" class="btn-secondary">Word</button>
         <button onclick="exportExcel()" class="btn-secondary">Excel</button>
-        <button onclick="viderClasseDepuisEleves()" class="btn-secondary danger" id="viderBtn">Vider le formulaire</button>
+        <button onclick="viderClasseDepuisEleves()" class="btn-secondary danger" id="viderBtn">Vider les élèves</button>
         <span id="loadingIndicator" style="display:none">Chargement...</span>
       </div>
       <div class="table-wrapper">
@@ -127,8 +127,8 @@
 
       <p><strong>Comment ça marche étape par étape :</strong></p>
 
-      <p><strong>1. Créer une formation (Promotion)</strong><br>
-      Allez dans l'onglet "Promotions" → cliquez sur "+ Nouvelle promotion" → entrez le nom de la formation (ex: "Réseaux Informatique"), les années (ex: "2024-2027"), et le nombre de classes (ex: "3" pour 1ère, 2ème, 3ème Année). Validez.</p>
+      <p><strong>1. Créer un formulaire</strong><br>
+      Allez dans l'onglet "Formulaires" → cliquez sur "+ Nouveau formulaire" → entrez le nom de la formation (ex: "Réseaux Informatique"), les années (ex: "2024-2027"), et le nombre de classes (ex: "3" pour 1ère, 2ème, 3ème Année). Validez.</p>
 
       <p><strong>2. Copier les liens des élèves</strong><br>
       Une fois la promotion créée, chaque classe a un lien unique (ex: .../1ere-annee). Cliquez sur "Copier" à côté du lien. Envoyez ce lien aux élèves de cette classe par WhatsApp. <strong>Chaque classe a son propre lien</strong> — ne mélangez pas.</p>
@@ -146,7 +146,7 @@
       L'onglet "Journal" enregistre chaque soumission (réussie ou refusée) avec la date, l'IP, le navigateur, l'appareil utilisé. Utile pour savoir qui a soumis quoi et depuis où.</p>
 
       <p><strong>7. Modifier le numéro WhatsApp</strong><br>
-      Dans l'onglet "Promotions", vous pouvez changer le numéro WhatsApp qui apparaît sur la page d'accueil. Ce numéro permet aux nouveaux élèves de contacter la direction pour obtenir leur lien.</p>
+      Dans l'onglet "Formulaires", vous pouvez changer le numéro WhatsApp qui apparaît sur la page d'accueil. Ce numéro permet aux nouveaux élèves de contacter la direction pour obtenir leur lien.</p>
 
       <p><strong>Conseils importants :</strong><br>
       - Ne partagez jamais le lien /admin — il est réservé à la direction<br>
@@ -162,7 +162,7 @@
 <div id="promoModal" class="modal" style="display:none">
   <div class="modal-content">
     <span class="modal-close" onclick="closeModal()">&times;</span>
-    <h3>Nouvelle promotion</h3>
+    <h3>Nouveau formulaire</h3>
     <form id="promoForm">
       <label>Nom de la formation</label>
       <input type="text" id="promoNom" required placeholder="Réseaux Informatique">
@@ -189,6 +189,19 @@
       <button type="submit">Créer la promotion</button>
       <p id="promoMsg" class="message" style="display:none"></p>
     </form>
+  </div>
+</div>
+
+<!-- Modal Vider confirmation -->
+<div id="viderModal" class="modal" style="display:none">
+  <div class="modal-content" style="max-width:360px;text-align:center">
+    <span class="modal-close" onclick="closeViderModal()">&times;</span>
+    <h3 style="font-size:16px;margin-bottom:8px">⚠ Vider la classe ?</h3>
+    <p id="viderModalText" style="font-size:14px;color:var(--text-secondary);margin-bottom:16px"></p>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeViderModal()" class="btn-secondary" style="flex:1;margin-top:0">Annuler</button>
+      <button id="viderConfirmBtn" class="danger" style="flex:1;margin-top:0">DELETE</button>
+    </div>
   </div>
 </div>
 

@@ -96,7 +96,7 @@ async function loadPromotions() {
               <span class="classe-count">${c.eleves} élèves</span>
               <code class="classe-link">https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}</code>
               <button class="btn-tiny" onclick="copyLink('https://enamdt.vercel.app/renseignements/${escHtml(p.slug)}/${escHtml(c.slug)}')">Copier</button>
-              <button class="btn-tiny danger" onclick="viderClasse('${c.id}')">Vider</button>
+              <button class="btn-tiny danger" onclick="viderClasse('${c.id}', '${escHtml(c.nom)}')">Vider</button>
             </div>
           `).join("")}
         </div>
@@ -355,12 +355,30 @@ async function viderClasseDepuisEleves() {
   }
 }
 
-async function viderClasse(classeId) {
-  if (!confirm("Supprimer tous les élèves de cette classe ?")) return;
-  const res = await fetch("/api/students/class/" + classeId, { method: "DELETE", headers: { "Authorization": token } });
+let pendingViderClasseId = null;
+
+function showViderModal(classeId, classeNom) {
+  pendingViderClasseId = classeId;
+  document.getElementById("viderModalText").textContent = "Vider " + classeNom + " ? Cette action supprime tous les élèves.";
+  document.getElementById("viderModal").style.display = "flex";
+}
+
+function closeViderModal() {
+  document.getElementById("viderModal").style.display = "none";
+  pendingViderClasseId = null;
+}
+
+document.getElementById("viderConfirmBtn").addEventListener("click", async () => {
+  if (!pendingViderClasseId) return;
+  const res = await fetch("/api/students/class/" + pendingViderClasseId, { method: "DELETE", headers: { "Authorization": token } });
+  closeViderModal();
   if (!res.ok) { alert("Erreur lors du vidage de la classe"); return; }
   loadPromotions();
   loadStudents();
+});
+
+async function viderClasse(classeId, classeNom) {
+  showViderModal(classeId, classeNom);
 }
 
 async function confirmDeleteAll() {
@@ -557,6 +575,8 @@ async function deletePreEnrolled(id, name) {
 }
 
 window.addEventListener("click", e => {
-  const modal = document.getElementById("promoModal");
-  if (e.target === modal) closeModal();
+  const promoM = document.getElementById("promoModal");
+  if (e.target === promoM) closeModal();
+  const viderM = document.getElementById("viderModal");
+  if (e.target === viderM) closeViderModal();
 });
