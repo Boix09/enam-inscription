@@ -30,6 +30,32 @@ router.get("/api/settings/whatsapp", async (req, res) => {
   res.json({ whatsapp: data?.value || "+50938817140" });
 });
 
+// GET /api/feature-flags — retourne les flags activés (public)
+router.get("/api/feature-flags", async (req, res) => {
+  const { data, error } = await supabaseAnon
+    .from("feature_flags").select("key, enabled");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// GET /api/settings/banner — message de bannière (public)
+router.get("/api/settings/banner", async (req, res) => {
+  const { data } = await supabaseAnon
+    .from("settings").select("value").eq("key", "banner_message").single();
+  res.json({ message: data?.value || "" });
+});
+
+// PUT /api/settings/banner — mettre à jour la bannière (super admin)
+router.put("/api/settings/banner", async (req, res) => {
+  if (req.headers.authorization !== process.env.SUPER_ADMIN_PASSWORD)
+    return res.status(401).json({ error: "Non autorisé" });
+  const { message } = req.body;
+  const { error } = await supabaseAdmin
+    .from("settings").upsert({ key: "banner_message", value: message }, { onConflict: "key" });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 router.get("/api/context", async (req, res) => {
   const { promo_slug, classe_slug } = req.query;
   if (!promo_slug || !classe_slug)

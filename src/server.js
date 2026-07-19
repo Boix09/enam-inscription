@@ -14,7 +14,7 @@ const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   message: { error: "Trop de tentatives. Réessaie dans une minute." },
-  keyGenerator: (req) => req.ip || req.headers["x-forwarded-for"] || "unknown",
+  validate: { xForwardedForHeader: false },
 });
 app.use("/api/students", limiter);
 
@@ -28,11 +28,18 @@ app.use("/api/students", studentsRouter);
 app.use("/api/exports", exportsRouter);
 app.use("/api", require("./routes/preEnrolled"));
 app.use("/api/admin/promotions", require("./routes/admin/promotions"));
+app.use("/api/admin/pre-enrolled", require("./routes/admin/preEnrolled"));
 app.use("/api/logs", require("./routes/logs"));
 app.use("/", require("./routes/public"));
+app.use("/api/superadmin", require("./routes/superadmin"));
+app.use("/api/public", require("./routes/publicApi"));
 
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "admin.html"));
+});
+
+app.get("/superadmin", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "superadmin.html"));
 });
 
 if (require.main === module) {

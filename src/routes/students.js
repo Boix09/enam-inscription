@@ -88,7 +88,7 @@ router.get("/", async (req, res) => {
 
   const query = supabaseAdmin.from("students").select("*, classe_id");
   if (req.query.classe_id) query.eq("classe_id", req.query.classe_id);
-  query.order("no", { ascending: true });
+  query.order("nom", { ascending: true }).order("prenom", { ascending: true });
 
   const { data, error } = await query;
 

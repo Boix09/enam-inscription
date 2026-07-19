@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>ENAM - Super Administration</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  .tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--border); flex-wrap: wrap; }
+  .tab-btn { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; background: transparent; color: var(--text-secondary); border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: color 0.2s, border-color 0.2s; min-width: 120px; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .flag-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+  .flag-info { flex: 1; }
+  .flag-info strong { display: block; font-size: 14px; }
+  .flag-info small { color: var(--text-secondary); font-size: 12px; }
+  .toggle-switch { position: relative; width: 48px; height: 26px; margin-left: 16px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 26px; transition: 0.3s; }
+  .toggle-slider::before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+  .backup-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .backup-actions button { flex: 1; min-width: 200px; margin-top: 0; }
+  .backup-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .file-input-wrapper { flex: 1; min-width: 200px; }
+  .file-input-wrapper input { font-size: 13px; padding: 8px; }
+  .log-entry { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+  .log-entry:last-child { border-bottom: none; }
+  .log-date { color: var(--text); font-weight: 500; }
+  .section-title { font-size: 15px; font-weight: 700; margin: 20px 0 12px; padding-bottom: 4px; border-bottom: 2px solid var(--accent); }
+  .back-link { display: inline-block; margin-top: 16px; font-size: 13px; color: var(--accent); text-decoration: none; }
+  .back-link:hover { text-decoration: underline; }
+  #restoreArea { display: none; }
+  table#logsTableSA th, table#logsTableSA td { font-size: 12px; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .status-on { background: var(--success-bg); color: var(--success-text); }
+  .status-off { background: var(--error-bg); color: var(--error-text); }
+</style>
+</head>
+<body>
+<div id="siteBanner"></div>
+<button id="darkModeToggle" title="Mode sombre"></button>
+<div class="container">
+  <div class="header">
+    <img src="/logo.jpg" alt="ENAM" class="logo">
+    <h2>Super Administration</h2>
+    <p style="font-size:12px;color:var(--text-secondary)">Gestion avancée de la plateforme</p>
+  </div>
+
+  <div id="loginSection">
+    <form id="loginForm">
+      <label>Mot de passe super administrateur</label>
+      <input type="password" id="passwordInput" required>
+      <button type="submit">Accéder</button>
+      <p id="loginError" class="message error" style="display:none"></p>
+    </form>
+  </div>
+
+  <div id="saSection" style="display:none">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="flags">Fonctionnalités</button>
+      <button class="tab-btn" data-tab="backup">Sauvegarde</button>
+      <button class="tab-btn" data-tab="logs">Journal</button>
+    </div>
+
+    <!-- Tab: Feature Flags -->
+    <div id="tab-flags" class="tab-content">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+        Active ou désactive les fonctionnalités de la plateforme. Les changements sont immédiats.
+      </p>
+      <div id="flagsList"></div>
+
+      <div id="bannerConfig" style="display:none;margin-top:20px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <p class="section-title" style="margin-top:0">Bannière d'annonce</p>
+        <label>Message de la bannière</label>
+        <input type="text" id="bannerMessage" placeholder="Ex: Rentrée des classes le 15 septembre 2025" maxlength="200">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="saveBanner()" class="btn-secondary" style="flex:1">Sauvegarder</button>
+          <button onclick="clearBanner()" class="btn-secondary danger" style="flex:1">Effacer</button>
+        </div>
+        <p id="bannerMsg" style="font-size:12px;color:var(--text-secondary);margin-top:4px"></p>
+      </div>
+
+      <p id="flagMsg" class="message" style="display:none"></p>
+    </div>
+
+    <!-- Tab: Backup / Restore -->
+    <div id="tab-backup" class="tab-content" style="display:none">
+      <p class="section-title">Sauvegarder</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+        Exporte toutes les données (promotions, classes, élèves, logs, paramètres) en un fichier JSON.
+      </p>
+      <div class="backup-actions">
+        <button onclick="exportBackup()" id="exportBtn">📥 Télécharger la sauvegarde</button>
+      </div>
+
+      <p class="section-title">Restaurer</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+        Importe un fichier de sauvegarde JSON pour restaurer l'état complet de la plateforme.
+        <strong style="color:var(--error-text)">Attention :</strong> cela remplacera toutes les données existantes.
+      </p>
+      <div class="backup-actions">
+        <div class="file-input-wrapper">
+          <input type="file" id="restoreFile" accept=".json">
+        </div>
+        <button onclick="document.getElementById('restoreFile').click()" class="btn-secondary" style="min-width:auto">Choisir un fichier</button>
+      </div>
+      <button onclick="showRestoreConfirm()" id="restoreBtn" class="danger" disabled>⚠ Restaurer depuis ce fichier</button>
+      <div id="restoreArea">
+        <p id="restorePreview" style="font-size:13px;margin:12px 0;color:var(--text-secondary)"></p>
+        <button onclick="confirmRestore()" id="confirmRestoreBtn" class="danger">Confirmer la restauration</button>
+        <button onclick="cancelRestore()" class="btn-secondary">Annuler</button>
+      </div>
+      <p id="backupMsg" class="message" style="display:none"></p>
+    </div>
+
+    <!-- Tab: Super Admin Logs -->
+    <div id="tab-logs" class="tab-content" style="display:none">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+        Journal des actions effectuées depuis le panneau super admin.
+      </p>
+      <div id="saLogsList"></div>
+    </div>
+  </div>
+
+  <a href="/admin" class="back-link">← Retour à l'administration</a>
+</div>
+
+<script src="/features.js"></script>
+<script src="/superadmin.js"></script>
+</body>
+</html>

@@ -99,3 +99,43 @@ CREATE POLICY insert_submission_logs ON submission_logs FOR INSERT WITH CHECK (t
 
 CREATE INDEX IF NOT EXISTS idx_submission_logs_classe ON submission_logs (classe_id);
 CREATE INDEX IF NOT EXISTS idx_submission_logs_created ON submission_logs (created_at DESC);
+
+-- Feature flags (contrôlées par le super admin)
+CREATE TABLE IF NOT EXISTS feature_flags (
+  key TEXT PRIMARY KEY,
+  enabled BOOLEAN DEFAULT false,
+  label TEXT NOT NULL,
+  description TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+INSERT INTO feature_flags (key, enabled, label, description) VALUES
+  ('tokens_individuels', false, 'Tokens individuels', 'Tokens individuels pour les élèves'),
+  ('tokens_vierges', false, 'Tokens vierges', 'Générer des tokens vierges'),
+  ('gerer_pre_inscrits', false, 'Gérer pré-inscrits', 'Interface de gestion des pré-inscrits'),
+  ('validation_manuelle', false, 'Validation manuelle', 'Validation manuelle des inscriptions'),
+  ('mode_sombre', false, 'Mode sombre', 'Activer le mode sombre sur le site'),
+  ('theme_couleurs', false, 'Thème couleurs', 'Personnaliser les couleurs du thème'),
+  ('banniere_annonce', false, 'Bannière annonce', 'Afficher une bannière d''annonce sur toutes les pages'),
+  ('recherche_globale', false, 'Recherche globale', 'Barre de recherche dans tout le site'),
+  ('carte_eleves', false, 'Carte des élèves', 'Vue carte des élèves par localisation'),
+  ('api_publique', false, 'API publique', 'Activer l\'API publique pour les intégrations')
+ON CONFLICT (key) DO NOTHING;
+
+ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
+CREATE POLICY select_feature_flags ON feature_flags FOR SELECT USING (true);
+CREATE POLICY update_feature_flags ON feature_flags FOR UPDATE USING (true);
+GRANT SELECT ON TABLE feature_flags TO anon;
+
+-- Journal des actions super admin
+CREATE TABLE IF NOT EXISTS super_admin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  action TEXT NOT NULL,
+  details TEXT,
+  ip_address TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE super_admin_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY select_sa_logs ON super_admin_logs FOR SELECT USING (true);
+CREATE POLICY insert_sa_logs ON super_admin_logs FOR INSERT WITH CHECK (true);

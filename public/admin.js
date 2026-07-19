@@ -1,4 +1,5 @@
 let token = "";
+let flags = {};
 
 // --- Login ---
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
@@ -16,6 +17,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }
     document.getElementById("loginSection").style.display = "none";
     document.getElementById("adminSection").style.display = "block";
+    await loadFlags();
     loadPromotions();
     loadStudents();
     populateClasseFilter();
@@ -27,6 +29,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 });
 
+async function loadFlags() {
+  try {
+    const res = await fetch("/api/feature-flags");
+    const data = await res.json();
+    flags = {};
+    data.forEach(f => { flags[f.key] = f.enabled; });
+    const searchBar = document.getElementById("searchBar");
+    if (searchBar) searchBar.style.display = flags.recherche_globale ? "block" : "none";
+    const preTab = document.getElementById("preTab");
+    if (preTab) preTab.style.display = flags.gerer_pre_inscrits ? "" : "none";
+  } catch(e) {}
+}
+
 // --- Tabs ---
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -35,6 +50,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
     if (btn.dataset.tab === "eleves") { loadStudents(); populateClasseFilter(); }
+    if (btn.dataset.tab === "preinscrits") { populatePreClasseFilter(); loadPreEnrolled(); }
     if (btn.dataset.tab === "journal") { populateLogClasseFilter(); loadLogs(); }
   });
 });
@@ -181,9 +197,26 @@ async function buildClasseMap() {
   } catch(e) {}
 }
 
+let searchTerm = "";
+
+function filterStudents() {
+  searchTerm = (document.getElementById("searchInput")?.value || "").toLowerCase();
+  renderTable();
+}
+
 function renderTable() {
   const tbody = document.querySelector("#studentsTable tbody");
-  tbody.innerHTML = currentStudents.map((s, i) => `
+  const filtered = searchTerm
+    ? currentStudents.filter(s =>
+        (s.nom || "").toLowerCase().includes(searchTerm) ||
+        (s.prenom || "").toLowerCase().includes(searchTerm) ||
+        (s.telephone_whatsapp || "").includes(searchTerm) ||
+        (s.telephone_appel || "").includes(searchTerm) ||
+        (s.adresse || "").toLowerCase().includes(searchTerm) ||
+        (s.contact_nom || "").toLowerCase().includes(searchTerm) ||
+        (s.contact_telephone || "").includes(searchTerm))
+    : currentStudents;
+  tbody.innerHTML = filtered.map((s, i) => `
     <tr>
       <td>${i + 1}</td>
       <td>${escHtml(s.nom)}</td>
@@ -452,6 +485,75 @@ function escHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+// --- Pré-inscrits ---
+async function loadPreEnrolled() {
+  const tbody = document.querySelector("#preTable tbody");
+  try {
+    await populatePreClasseFilter();
+    const classeId = document.getElementById("preClasseFilter")?.value || "";
+    const url = "/api/admin/pre-enrolled" + (classeId ? "?classe_id=" + classeId : "");
+    const res = await fetch(url, { headers: { "Authorization": token } });
+    const data = await res.json();
+    document.getElementById("preCount").textContent = data.length + " pré-inscrits";
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td>${p.no}</td>
+        <td>${escHtml(p.nom)}</td>
+        <td>${escHtml(p.prenom)}</td>
+        <td>${p.registered
+          ? '<span style="color:var(--success-text);font-weight:600">✓ Inscrit</span>'
+          : '<span style="color:var(--text-secondary)">—</span>'
+        }</td>
+        <td style="white-space:nowrap">
+          <button class="btn-tiny" onclick="togglePreRegistered('${p.id}', ${!p.registered})">
+            ${p.registered ? "Marquer non-inscrit" : "Marquer inscrit"}
+          </button>
+          <button class="btn-tiny danger" onclick="deletePreEnrolled('${p.id}', '${escHtml(p.nom)} ${escHtml(p.prenom)}')">✕</button>
+        </td>
+      </tr>
+    `).join("");
+  } catch(e) {
+    tbody.innerHTML = "<tr><td colspan='5'>Erreur chargement</td></tr>";
+  }
+}
+
+async function populatePreClasseFilter() {
+  const sel = document.getElementById("preClasseFilter");
+  if (!sel) return;
+  try {
+    const res = await fetch("/api/admin/promotions", { headers: { "Authorization": token } });
+    const promotions = await res.json();
+    sel.innerHTML = '<option value="">Toutes les classes</option>';
+    promotions.forEach(p => {
+      p.classes.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${escHtml(p.nom)} - ${escHtml(c.nom)}</option>`;
+      });
+    });
+  } catch(e) {}
+}
+
+async function togglePreRegistered(id, registered) {
+  try {
+    await fetch("/api/admin/pre-enrolled/" + id, {
+      method: "PUT",
+      headers: { "Authorization": token, "Content-Type": "application/json" },
+      body: JSON.stringify({ registered })
+    });
+    loadPreEnrolled();
+  } catch(e) { alert("Erreur"); }
+}
+
+async function deletePreEnrolled(id, name) {
+  if (!confirm("Supprimer " + name + " de la liste des pré-inscrits ?")) return;
+  try {
+    await fetch("/api/admin/pre-enrolled/" + id, {
+      method: "DELETE",
+      headers: { "Authorization": token }
+    });
+    loadPreEnrolled();
+  } catch(e) { alert("Erreur"); }
 }
 
 window.addEventListener("click", e => {

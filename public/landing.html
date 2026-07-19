@@ -5,28 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <title>ENAM - Fiche de renseignements</title>
+<link rel="stylesheet" href="/style.css">
 <style>
-:root {
-  --bg: #f0f2f5; --surface: #fff; --text: #1a1a1a;
-  --text-secondary: #555; --accent: #1a56db;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1117; --surface: #1a1d27; --text: #e4e6eb;
-    --text-secondary: #9ba1a6; --accent: #5b8def;
-  }
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg); color: var(--text);
   display: flex; align-items: center; justify-content: center;
   min-height: 100vh; padding: 16px;
 }
 .card {
   background: var(--surface); border-radius: 16px; padding: 40px 32px;
   max-width: 420px; width: 100%; text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .logo { width: 100px; height: 100px; border-radius: 12px; margin-bottom: 16px; }
 h1 { font-size: 20px; margin-bottom: 4px; }
@@ -40,6 +27,8 @@ p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bott
 </style>
 </head>
 <body>
+<div id="siteBanner"></div>
+<button id="darkModeToggle" title="Mode sombre"></button>
 <div class="card">
   <img src="/logo.jpg" alt="ENAM" class="logo">
   <h1>ÉCOLE NATIONALE<br>DES ARTS ET MÉTIERS</h1>
@@ -51,6 +40,7 @@ p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bott
   </p>
   <a id="whatsappBtn" href="https://wa.me/50938817140" class="btn" target="_blank">Contacter l'administration</a>
 </div>
+<script src="/features.js"></script>
 <script>
 fetch("/api/settings/whatsapp").then(r=>r.json()).then(d=>{
   document.getElementById("whatsappBtn").href = "https://wa.me/" + d.whatsapp.replace(/[^\d]/g,"");

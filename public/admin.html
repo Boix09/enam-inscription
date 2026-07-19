@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<div id="siteBanner"></div>
+<button id="darkModeToggle" title="Mode sombre"></button>
 <div class="container">
   <div class="header">
     <img src="/logo.jpg" alt="ENAM" class="logo">
@@ -27,6 +29,7 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="promotions">Promotions</button>
       <button class="tab-btn" data-tab="eleves">Élèves</button>
+      <button class="tab-btn" data-tab="preinscrits" id="preTab" style="display:none">Pré-inscrits</button>
       <button class="tab-btn" data-tab="journal">Journal</button>
     </div>
 
@@ -71,6 +74,9 @@
         <select id="classeFilter" onchange="loadStudents()">
           <option value="">Toutes les classes</option>
         </select>
+        <div id="searchBar" style="display:none;flex:1;min-width:150px">
+          <input type="text" id="searchInput" placeholder="Rechercher un élève..." style="width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text)" oninput="filterStudents()">
+        </div>
         <button onclick="exportWord()" class="btn-secondary">Word</button>
         <button onclick="exportExcel()" class="btn-secondary">Excel</button>
         <button onclick="viderClasseDepuisEleves()" class="btn-secondary danger" id="viderBtn">Vider le formulaire</button>
@@ -89,6 +95,20 @@
           <tbody id="deletedTable"></tbody>
         </table>
         <button onclick="confirmDeleteAll()" class="btn-secondary danger" style="margin-top:8px;width:auto">Tout supprimer définitivement</button>
+      </div>
+    <!-- Tab Pré-inscrits -->
+    <div id="tab-preinscrits" class="tab-content" style="display:none">
+      <div class="admin-actions">
+        <select id="preClasseFilter" onchange="loadPreEnrolled()">
+          <option value="">Toutes les classes</option>
+        </select>
+        <span id="preCount" style="font-size:13px;color:var(--text-secondary)"></span>
+      </div>
+      <div class="table-wrapper">
+        <table id="preTable">
+          <thead><tr><th>NO</th><th>NOM</th><th>PRÉNOM</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -200,6 +220,7 @@
   </div>
 </div>
 
+<script src="/features.js"></script>
 <script src="/admin.js"></script>
 </body>
 </html>

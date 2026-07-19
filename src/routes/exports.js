@@ -16,7 +16,7 @@ async function getStudents(password, classe_id, ids) {
     const idArr = ids.split(",").filter(Boolean);
     if (idArr.length > 0) query.in("id", idArr);
   }
-  const { data, error } = await query.order("no", { ascending: true });
+  const { data, error } = await query.order("nom", { ascending: true }).order("prenom", { ascending: true });
   if (error) throw error;
   return data;
 }
